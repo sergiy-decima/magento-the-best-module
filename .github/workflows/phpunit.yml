@@ -44,7 +44,7 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
-          name: php-app
+          name: build-php-app
           path: .
 
   init:
@@ -55,7 +55,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: php-app
+          name: build-php-app
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -77,15 +77,21 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: init-php-app
+          path: .
+
   attach:
     needs: init
     name: Attach Subject Module
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact from init job
         uses: actions/download-artifact@v3
         with:
-          name: php-app
+          name: init-php-app
 
       - name: Composer Require Module
         working-directory: magento
@@ -97,15 +103,21 @@ jobs:
           ./bin/magento module:enable --all
           ./bin/magento setup:di:compile
 
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: attach-php-app
+          path: .
+
   test:
     needs: attach
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact from attach job
         uses: actions/download-artifact@v3
         with:
-          name: php-app
+          name: attach-php-app
 
       - name: Run PHPUnit Tests
         working-directory: magento
