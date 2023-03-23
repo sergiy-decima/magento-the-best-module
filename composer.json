@@ -1,0 +1,23 @@
+{
+    "name": "sergiy-decima/magento-the-best-module",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "php": "~8.1.0||~8.2.0",
+        "magento/framework": "103.0.*"
+    },
+    "require-dev": {
+        "mockery/mockery": "~1.5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Decima\\TheBestModule\\": ""
+        },
+        "files": [
+            "registration.php"
+        ]
+    }
+}

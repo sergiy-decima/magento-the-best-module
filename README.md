@@ -1,1 +1,1 @@
-# magento-thebest-module
+# magento-the-best-module

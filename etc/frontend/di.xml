@@ -1,0 +1,5 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Api\Data\ProductInterface">
+        <plugin name="decima_thebestmodule_plugin_getproductname" type="Decima\TheBestModule\Plugin\GetProductNamePlugin" sortOrder="10" disabled="false"/>
+    </type>
+</config>
