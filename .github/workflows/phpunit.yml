@@ -1,5 +1,5 @@
-name: Demo Coverage
-run-name: Coverage Testing
+name: Coverage Test
+run-name: PHPHUnit Coverage Testing
 on:
   push:
     paths-ignore:
@@ -73,7 +73,7 @@ jobs:
 
       - name: Run PHPUnit Tests
         working-directory: magento
-        run: vendor/bin/phpunit --coverage-clover=../extensions/current/output/clover.coverage.xml
+        run: vendor/bin/phpunit -c phpunit.xml.dist ../extensions/current --coverage-clover=../extensions/current/output/clover.coverage.xml
 
       - name: Coverage Summary Report
         id: clover_coverage
