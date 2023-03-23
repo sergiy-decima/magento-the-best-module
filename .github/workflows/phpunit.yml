@@ -1,0 +1,85 @@
+name: Demo Coverage
+run-name: Coverage Testing
+on:
+  push:
+    paths-ignore:
+      - .env
+      - Makefile
+      - '**.md'
+  workflow_dispatch:
+  schedule:
+    - cron: '30 * * * *'
+jobs:
+  build:
+    name: Build Test Server
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Create Work Directories
+        run: |
+          mkdir extensions
+          mkdir magento
+
+      - name: Git Checkout Module
+        uses: actions/checkout@v3
+        with:
+          path: extensions/current
+
+      - name: Git Checkout Application
+        uses: actions/checkout@v3
+        with:
+          repository: sergiy-decima/magento-sample-project
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          path: magento
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: phpunit-bridge
+          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
+          coverage: xdebug
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Create Composer Cache
+        id: cache-composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        working-directory: magento
+        env:
+          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+        run: |
+          echo "$AUTH_JSON" > auth.json
+          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Composer Require Module
+        working-directory: magento
+        run: composer require sergiy-decima/magento-the-best-module:@dev --ansi --no-interaction
+
+      - name: Build Magento
+        working-directory: magento
+        run: |
+          ./bin/magento module:enable --all
+          ./bin/magento setup:di:compile
+
+      - name: Run PHPUnit Tests
+        working-directory: magento
+        run: vendor/bin/phpunit --coverage-clover=../extensions/current/output/clover.coverage.xml
+
+      - name: Coverage Summary Report
+        id: clover_coverage
+        uses: sergiy-decima/clover-coverage-action@v1.0.0
+        if: always()
+        with:
+          filename: extensions/current/output/clover.coverage.xml
+          thresholds: '60-80'
+          fail_if_low: false
