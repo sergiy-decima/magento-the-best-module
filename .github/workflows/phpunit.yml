@@ -16,22 +16,16 @@ jobs:
     strategy:
       fail-fast: true
     steps:
-      - name: Create Work Directories
-        run: |
-          mkdir extensions
-          mkdir magento
-
-      - name: Git Checkout Module
-        uses: actions/checkout@v3
-        with:
-          path: extensions/current
-
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-          path: magento
+
+      - name: Git Checkout Module
+        uses: actions/checkout@v3
+        with:
+          path: extensions/current
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -40,22 +34,6 @@ jobs:
           tools: phpunit-bridge
           extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
           coverage: xdebug
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-php-app
-          path: .
-
-  init:
-    needs: build
-    name: Init Composer
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: build-php-app
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -70,58 +48,22 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer Dependencies
-        working-directory: magento
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: init-php-app
-          path: .
-
-  attach:
-    needs: init
-    name: Attach Subject Module
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact from init job
-        uses: actions/download-artifact@v3
-        with:
-          name: init-php-app
-
       - name: Composer Require Module
-        working-directory: magento
-        run: composer require sergiy-decima/magento-the-best-module:@dev --ansi --no-interaction
+        run: composer require sergiy-decima/magento-the-best-module --ansi --no-interaction
 
       - name: Build Magento
-        working-directory: magento
         run: |
           ./bin/magento module:enable --all
           ./bin/magento setup:di:compile
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: attach-php-app
-          path: .
-
-  test:
-    needs: attach
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact from attach job
-        uses: actions/download-artifact@v3
-        with:
-          name: attach-php-app
-
       - name: Run PHPUnit Tests
-        working-directory: magento
-        run: vendor/bin/phpunit -c phpunit.xml.dist ../extensions/current --coverage-clover=../extensions/current/output/clover.coverage.xml
+        run: vendor/bin/phpunit -c phpunit.xml.dist extensions/current --coverage-clover=extensions/current/output/clover.coverage.xml
 
       - name: Coverage Summary Report
         id: clover_coverage
