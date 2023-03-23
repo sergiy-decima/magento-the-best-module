@@ -41,11 +41,22 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
           coverage: xdebug
 
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: php-app
+          path: .
+
   init:
     needs: build
     name: Init Composer
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: php-app
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -71,6 +82,11 @@ jobs:
     name: Attach Subject Module
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: php-app
+
       - name: Composer Require Module
         working-directory: magento
         run: composer require sergiy-decima/magento-the-best-module:@dev --ansi --no-interaction
@@ -86,6 +102,11 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: php-app
+
       - name: Run PHPUnit Tests
         working-directory: magento
         run: vendor/bin/phpunit -c phpunit.xml.dist ../extensions/current --coverage-clover=../extensions/current/output/clover.coverage.xml
