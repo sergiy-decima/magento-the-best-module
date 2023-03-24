@@ -61,13 +61,21 @@ jobs:
           ./bin/magento setup:di:compile
 
       - name: Run PHPUnit Tests
-        run: vendor/bin/phpunit -c phpunit.xml.dist extensions/current --coverage-clover=extensions/current/output/clover.coverage.xml
+        run: vendor/bin/phpunit -c phpunit.xml.dist extensions/current --coverage-html=extensions/current/output/html --coverage-clover=extensions/current/output/clover-coverage.xml
 
-      - name: Upload Artifact for "coverage" Job
+      - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
+        if: always()
         with:
-          name: build-coverage-xml
-          path: extensions/current/output/clover.coverage.xml
+          name: coverage.xml.zip
+          path: extensions/current/output/clover-coverage.xml
+
+      - name: Upload Coverage HTML
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage.html.zip
+          path: extensions/current/output/html
 
   coverage:
     needs: build
@@ -77,13 +85,12 @@ jobs:
       - name: Download Artifact from "build" Job
         uses: actions/download-artifact@v3
         with:
-          name: build-coverage-xml
+          name: coverage.xml.zip
 
       - name: Coverage Summary Report
         id: clover_coverage
         uses: sergiy-decima/clover-coverage-action@1.0.0
-        if: always()
         with:
-          filename: extensions/current/output/clover.coverage.xml
+          filename: clover-coverage.xml
           thresholds: '60-80'
           fail_if_low: false
