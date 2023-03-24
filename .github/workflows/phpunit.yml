@@ -67,7 +67,7 @@ jobs:
 
       - name: Coverage Summary Report
         id: clover_coverage
-        uses: sergiy-decima/clover-coverage-action@v1.0.0
+        uses: sergiy-decima/clover-coverage-action@1.0.0
         if: always()
         with:
           filename: extensions/current/output/clover.coverage.xml
