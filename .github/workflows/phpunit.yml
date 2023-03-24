@@ -23,7 +23,7 @@ jobs:
       - name: Git Checkout Module
         uses: actions/checkout@v3
         with:
-          path: extensions/current
+          path: extensions/Decima_TheBestModule
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -61,28 +61,28 @@ jobs:
           ./bin/magento setup:di:compile
 
       - name: Run PHPUnit Tests
-        run: vendor/bin/phpunit -c phpunit.xml.dist extensions/current --coverage-html=extensions/current/output/html --coverage-clover=extensions/current/output/clover-coverage.xml
+        run: vendor/bin/phpunit -c phpunit.xml.dist extensions/Decima_TheBestModule --coverage-html=extensions/Decima_TheBestModule/output/html --coverage-clover=extensions/Decima_TheBestModule/output/clover-coverage.xml
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: coverage-xml
-          path: extensions/current/output/clover-coverage.xml
+          path: extensions/Decima_TheBestModule/output/clover-coverage.xml
 
       - name: Upload Coverage HTML
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: coverage-html
-          path: extensions/current/output/html
+          path: extensions/Decima_TheBestModule/output/html
 
   coverage:
     needs: build
     name: Check Coverage Summary
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifact from "build" Job
+      - name: Download Coverage XML
         uses: actions/download-artifact@v3
         with:
           name: coverage-xml
