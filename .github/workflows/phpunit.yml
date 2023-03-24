@@ -65,20 +65,17 @@ jobs:
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
-        if: always()
         with:
           name: coverage-xml
           path: extensions/Decima_TheBestModule/output/clover-coverage.xml
 
       - name: Upload Coverage HTML
         uses: actions/upload-artifact@v3
-        if: always()
         with:
           name: coverage-html
           path: extensions/Decima_TheBestModule/output/html
 
   coverage:
-    if: always()
     needs: build
     name: Check Coverage Summary
     runs-on: ubuntu-latest

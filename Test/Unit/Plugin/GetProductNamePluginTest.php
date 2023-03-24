@@ -33,7 +33,7 @@ class GetProductNamePluginTest extends TestCase
     {
         return [
             ['iPhone 12Pro', 'The Best iPhone 12Pro'],
-            ['TV Sony', 'The Best TV Sony2'],
+            ['TV Sony', 'The Best TV Sony'],
         ];
     }
 
