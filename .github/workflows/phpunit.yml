@@ -13,6 +13,8 @@ jobs:
   build:
     name: Build & Run Tests
     runs-on: ubuntu-latest
+    env:
+      EXTENSION_PATH: extensions/Decima_TheBestModule
     steps:
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -23,7 +25,7 @@ jobs:
       - name: Git Checkout Module
         uses: actions/checkout@v3
         with:
-          path: extensions/Decima_TheBestModule
+          path: ${{ env.EXTENSION_PATH }}
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -52,8 +54,15 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Retrieve Composer Name and Version of Module
+        id: extension-info
+        working-directory: ${{ env.EXTENSION_PATH }}
+        run: |
+          (echo "name=" && composer show -s --name-only | tr -d '\n') >> $GITHUB_OUTPUT
+          (echo "version=" && cat composer.json | grep \"version\": | awk '{print $NF}' | head -1 | sed 's/[\",]//g' ) | tr -d '\n' >> $GITHUB_OUTPUT
+
       - name: Composer Require Module
-        run: composer require sergiy-decima/magento-the-best-module --ansi --no-interaction
+        run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction
 
       - name: Build Magento
         run: |
@@ -61,19 +70,19 @@ jobs:
           ./bin/magento setup:di:compile
 
       - name: Run PHPUnit Tests
-        run: vendor/bin/phpunit -c phpunit.xml.dist extensions/Decima_TheBestModule --coverage-html=extensions/Decima_TheBestModule/output/html --coverage-clover=extensions/Decima_TheBestModule/output/clover-coverage.xml
+        run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
         with:
           name: coverage-xml
-          path: extensions/Decima_TheBestModule/output/clover-coverage.xml
+          path: ${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
 
       - name: Upload Coverage HTML
         uses: actions/upload-artifact@v3
         with:
           name: coverage-html
-          path: extensions/Decima_TheBestModule/output/html
+          path: ${{ env.EXTENSION_PATH }}/output/html
 
   coverage:
     needs: build
