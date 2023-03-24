@@ -61,7 +61,7 @@ jobs:
           EXTENSION_NAME=`composer show -s --name-only`
           echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
           EXTENSION_VERSION=`cat composer.json | grep \"version\": | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
-          echo "name=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
       - name: Composer Require Module
         run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction
