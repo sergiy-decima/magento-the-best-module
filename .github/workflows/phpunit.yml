@@ -58,7 +58,7 @@ jobs:
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
-          (echo "name=" && composer show -s --name-only | tr -d '\n') >> $GITHUB_OUTPUT
+          (echo "name=" && composer show -s --name-only) | tr -d '\n' >> $GITHUB_OUTPUT
           (echo "version=" && cat composer.json | grep \"version\": | awk '{print $NF}' | head -1 | sed 's/[\",]//g' ) | tr -d '\n' >> $GITHUB_OUTPUT
 
       - name: Composer Require Module
