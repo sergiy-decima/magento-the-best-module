@@ -78,6 +78,7 @@ jobs:
           path: extensions/Decima_TheBestModule/output/html
 
   coverage:
+    if: always()
     needs: build
     name: Check Coverage Summary
     runs-on: ubuntu-latest
