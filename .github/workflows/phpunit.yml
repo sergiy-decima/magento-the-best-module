@@ -67,14 +67,14 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: coverage.xml.zip
+          name: coverage-xml
           path: extensions/current/output/clover-coverage.xml
 
       - name: Upload Coverage HTML
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: coverage.html.zip
+          name: coverage-html
           path: extensions/current/output/html
 
   coverage:
@@ -85,7 +85,7 @@ jobs:
       - name: Download Artifact from "build" Job
         uses: actions/download-artifact@v3
         with:
-          name: coverage.xml.zip
+          name: coverage-xml
 
       - name: Coverage Summary Report
         id: clover_coverage
