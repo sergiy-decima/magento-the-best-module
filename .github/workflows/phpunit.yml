@@ -59,7 +59,9 @@ jobs:
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
           (echo "name=" && composer show -s --name-only) | tr -d '\n' >> $GITHUB_OUTPUT
+          echo "\n" >> $GITHUB_OUTPUT
           (echo "version=" && cat composer.json | grep \"version\": | awk '{print $NF}' | head -1 | sed 's/[\",]//g' ) | tr -d '\n' >> $GITHUB_OUTPUT
+          echo "\n" >> $GITHUB_OUTPUT
 
       - name: Composer Require Module
         run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction
