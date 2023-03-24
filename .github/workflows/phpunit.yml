@@ -1,5 +1,6 @@
 name: Coverage Test
 run-name: PHPUnit Coverage Testing
+
 on:
   push:
     paths-ignore:
@@ -7,14 +8,11 @@ on:
       - Makefile
       - '**.md'
   workflow_dispatch:
-  schedule:
-    - cron: '30 * * * *'
+
 jobs:
   build:
-    name: Build Test Server
+    name: Build & Run Tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -64,6 +62,22 @@ jobs:
 
       - name: Run PHPUnit Tests
         run: vendor/bin/phpunit -c phpunit.xml.dist extensions/current --coverage-clover=extensions/current/output/clover.coverage.xml
+
+      - name: Upload Artifact for "coverage" Job
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-coverage-xml
+          path: extensions/current/output/clover.coverage.xml
+
+  coverage:
+    needs: build
+    name: Check Coverage Summary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact from "build" Job
+        uses: actions/download-artifact@v3
+        with:
+          name: build-coverage-xml
 
       - name: Coverage Summary Report
         id: clover_coverage
