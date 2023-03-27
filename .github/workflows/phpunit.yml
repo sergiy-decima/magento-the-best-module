@@ -54,6 +54,12 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Init Composer Local Repository
+        run: |
+          cat composer.json
+          composer config repositories.dev-extensions path extensions/*
+          cat composer.json
+
       - name: Retrieve Composer Name and Version of Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
