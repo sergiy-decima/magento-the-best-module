@@ -6,16 +6,13 @@ namespace Decima\TheBestModule\Plugin;
 
 class GetProductNamePlugin
 {
-    public function afterGetName(\Magento\Catalog\Api\Data\ProductInterface $subject, $result): string
+    /**
+     * @param \Magento\Catalog\Api\Data\ProductInterface $subject
+     * @param string|null $result
+     * @return string
+     */
+    public function afterGetName(\Magento\Catalog\Api\Data\ProductInterface $subject, ?string $result): string
     {
         return 'The Best ' . $result;
-    }
-
-    public function someMethod(): int
-    {
-        $a = 1;
-        $b = 2;
-
-        return $a + $b;
     }
 }
