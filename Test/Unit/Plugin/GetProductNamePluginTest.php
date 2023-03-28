@@ -11,9 +11,10 @@ use PHPUnit\Framework\TestCase;
 
 class GetProductNamePluginTest extends TestCase
 {
-
     /**
      * @dataProvider dataForTestAfterGetName
+     * @param string $name
+     * @param string $expected
      * @return void
      */
     public function testAfterGetName(string $name, string $expected): void

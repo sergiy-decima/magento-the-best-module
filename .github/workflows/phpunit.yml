@@ -2,12 +2,13 @@ name: Coverage Test
 run-name: PHPUnit Coverage Testing
 
 on:
+  workflow_dispatch:
   push:
     paths-ignore:
-      - .env
-      - Makefile
       - '**.md'
-  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build:
@@ -106,4 +107,4 @@ jobs:
         with:
           filename: clover-coverage.xml
           thresholds: '60-80'
-          fail_if_low: false
+          fail_if_low: true
