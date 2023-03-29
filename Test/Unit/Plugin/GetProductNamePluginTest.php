@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Decima\TheBestModule\Test\Unit\Plugin;
 
+use Decima\TheBestModule\Model\Config;
 use Decima\TheBestModule\Plugin\GetProductNamePlugin;
 use Magento\Catalog\Api\Data\ProductInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -19,9 +20,12 @@ class GetProductNamePluginTest extends TestCase
      */
     public function testAfterGetName(string $name, string $expected): void
     {
+        $config = $this->createStub(\Decima\TheBestModule\Model\Config::class);
+        $config->method('isEnabled')->willReturn(true);
+
         $product = $this->getOriginSubject();
 
-        $getProductNamePlugin = $this->getSubjectUnderTest();
+        $getProductNamePlugin = $this->getSubjectUnderTest($config);
         $actual = $getProductNamePlugin->afterGetName($product, $name);
 
         $this->assertEquals($expected, $actual);
@@ -47,10 +51,11 @@ class GetProductNamePluginTest extends TestCase
     }
 
     /**
+     * @param Config $config
      * @return GetProductNamePlugin
      */
-    private function getSubjectUnderTest(): GetProductNamePlugin
+    private function getSubjectUnderTest(Config $config): GetProductNamePlugin
     {
-        return new GetProductNamePlugin();
+        return new GetProductNamePlugin($config);
     }
 }
