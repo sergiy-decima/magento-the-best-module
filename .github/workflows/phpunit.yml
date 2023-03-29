@@ -52,6 +52,10 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Init Composer Private Repositories
+        run: |
+          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+
       - name: Retrieve Composer Name and Version of Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
