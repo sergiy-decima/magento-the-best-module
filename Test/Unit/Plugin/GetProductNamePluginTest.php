@@ -14,14 +14,16 @@ class GetProductNamePluginTest extends TestCase
 {
     /**
      * @dataProvider dataForTestAfterGetName
+     *
+     * @param bool   $isModuleEnabled
      * @param string $name
      * @param string $expected
      * @return void
      */
-    public function testAfterGetName(string $name, string $expected): void
+    public function testAfterGetName(bool $isModuleEnabled, string $name, string $expected): void
     {
-        $config = $this->createStub(\Decima\TheBestModule\Model\Config::class);
-        $config->method('isEnabled')->willReturn(true);
+        $config = $this->createStub(Config::class);
+        $config->method('isEnabled')->willReturn($isModuleEnabled);
 
         $product = $this->getOriginSubject();
 
@@ -32,13 +34,14 @@ class GetProductNamePluginTest extends TestCase
     }
 
     /**
-     * @return array[]
+     * @return array[][]
      */
     public function dataForTestAfterGetName(): array
     {
         return [
-            ['iPhone 12Pro', 'The Best iPhone 12Pro'],
-            ['TV Sony', 'The Best TV Sony'],
+            [true, 'iPhone 12Pro', 'The Best iPhone 12Pro'],
+            [true, 'TV Sony', 'The Best TV Sony'],
+            [false, 'TV Sony', 'TV Sony'],
         ];
     }
 

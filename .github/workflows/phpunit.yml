@@ -50,7 +50,7 @@ jobs:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
-          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-suggest
 
       - name: Init Composer Private Repositories
         run: |
@@ -70,14 +70,14 @@ jobs:
           composer config repositories.${{ steps.extension-info.outputs.name }} path ${{ env.EXTENSION_PATH }}
 
       - name: Composer Require Module
-        run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction
+        run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
 
       - name: Build Magento
         run: |
           ./bin/magento module:enable --all
           ./bin/magento setup:di:compile
 
-      - name: Run PHPUnit Tests
+      - name: Execute Tests
         run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
 
       - name: Upload Coverage XML
