@@ -69,7 +69,8 @@ jobs:
       - name: Init Composer Private Repositories
         run: |
           cat magento/composer.json
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} ls -la
+#          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
       - name: Retrieve Composer Name and Version of Module
         id: extension-info
