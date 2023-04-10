@@ -22,11 +22,9 @@ jobs:
           repository: sergiy-decima/magento-local-deployment
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
 
-      - name: Prepare Magento Application
+      - name: Prepare Magento Settings
         run: |
           make prepare
-          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
-          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -39,6 +37,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: ${{ env.EXTENSION_PATH }}
+
+      - name: Prepare Magento DB
+        run: |
+          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
+          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
 
       - name: Create Composer Cache
         id: cache-composer
