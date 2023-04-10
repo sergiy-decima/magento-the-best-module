@@ -46,24 +46,24 @@ jobs:
 #          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
 #          coverage: xdebug
 #
-#      - name: Get Composer Cache Directory
-#        id: composer-cache
-#        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-#
-#      - name: Create Composer Cache
-#        id: cache-composer
-#        uses: actions/cache@v3
-#        with:
-#          path: ${{ steps.composer-cache.outputs.dir }}
-#          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-#          restore-keys: ${{ runner.os }}-composer-
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=~/.composer/cache" >> $GITHUB_OUTPUT
+
+      - name: Create Composer Cache
+        id: cache-composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/magento/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
       - name: Build Magento Application
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > magento/auth.json
-          make build
+          make env add-host composer-json composer-auth mysql-config mage-work-dir composer-install mage-install flush-all up about
 
       - name: List Magento Application
         if: always()
