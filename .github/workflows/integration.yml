@@ -21,6 +21,11 @@ jobs:
           repository: sergiy-decima/magento-local-deployment
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
 
+      - name: Prepare Magento Application
+        run: |
+          make prepare
+          ls -la
+
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
