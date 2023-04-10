@@ -63,12 +63,13 @@ jobs:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > magento/auth.json
-          make env add-host composer-json composer-auth mysql-config mage-work-dir composer-install mage-install flush-all up about
+          make env add-host composer-json composer-auth mysql-config mage-work-dir composer-install mage-install flush-all up
 
       - name: List Magento Application
         if: always()
         run: |
           ls -la magento
+          make admin-user
           ls -la magento/bin
 
 
