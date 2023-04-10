@@ -41,10 +41,19 @@ jobs:
         with:
           path: ${{ env.EXTENSION_PATH }}
 
-      - name: Copy DB
+#      - name: Copy DB
+#        run: |
+#          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
+#          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
+
+      - name: Import auth.json
+        env:
+          AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
-          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
-          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
+          echo "$AUTH_JSON" > $PWD/${{ env.MAGENTO_DIR }}/auth.json
+
+      - name: Import Local Extensions to Composer
+        run: make extensions
 
 #      - name: Get Composer Cache Directory
 #        id: composer-cache
@@ -68,7 +77,8 @@ jobs:
 
       - name: Init Composer Private Repositories
         run: |
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $PWD/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $PWD/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+          bin/composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+#          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $PWD/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $PWD/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 #          cat magento/composer.json
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
@@ -83,9 +93,9 @@ jobs:
 
       - name: Composer Require Module
         run: |
-          make extensions
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $PWD/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $PWD/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest --no-update
+          bin/composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
           cat magento/composer.json
+#          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $PWD/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $PWD/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer install
 
 #      - name: Build Magento Application
