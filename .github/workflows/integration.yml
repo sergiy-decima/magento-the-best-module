@@ -46,17 +46,17 @@ jobs:
           cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
           cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=~/.composer/cache" >> $GITHUB_OUTPUT
-
-      - name: Create Composer Cache
-        id: cache-composer
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/magento/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+#      - name: Get Composer Cache Directory
+#        id: composer-cache
+#        run: echo "dir=~/.composer/cache" >> $GITHUB_OUTPUT
+#
+#      - name: Create Composer Cache
+#        id: cache-composer
+#        uses: actions/cache@v3
+#        with:
+#          path: ${{ steps.composer-cache.outputs.dir }}
+#          key: ${{ runner.os }}-composer-${{ hashFiles('**/magento/composer.lock') }}
+#          restore-keys: ${{ runner.os }}-composer-
 
 #      - name: Import Environment
 #        id: import-env
@@ -84,7 +84,7 @@ jobs:
       - name: Composer Require Module
         run: |
           make extensions
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} ls -la
+          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bash -c "composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest --no-update"
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest --no-update
 #          cat magento/composer.json
 
