@@ -24,7 +24,6 @@ jobs:
       - name: Prepare Magento Application
         run: |
           make prepare
-          ls -la
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -37,15 +36,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: ${{ env.EXTENSION_PATH }}
-#
-#      - name: Install PHP
-#        uses: shivammathur/setup-php@v2
-#        with:
-#          php-version: 8.2
-#          tools: phpunit-bridge
-#          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
-#          coverage: xdebug
-#
+
+      - name: Copy DB
+        run: |
+          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
+          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=~/.composer/cache" >> $GITHUB_OUTPUT
@@ -58,17 +54,49 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/magento/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Build Magento Application
-        env:
-          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+      - name: Init Composer Private Repositories
         run: |
-          echo "$AUTH_JSON" > magento/auth.json
-          make env add-host composer-json composer-auth mysql-config mage-work-dir composer-install mage-install flush-all up
+          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
-      - name: List Magento Application
-        if: always()
+      - name: Retrieve Composer Name and Version of Module
+        id: extension-info
+        working-directory: ${{ env.EXTENSION_PATH }}
         run: |
-          make status
+          EXTENSION_NAME=`composer show -s --name-only`
+          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
+          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Import Environment
+        id: import-env
+        shell: bash
+        run: |
+          while read line; do
+            echo "$line" >> $GITHUB_ENV
+          done < ${{ env.ENV_FILE }}
+
+      - name: Composer Require Module
+        run: |
+          make extensions
+          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $(shell pwd)/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $(shell pwd)/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest --no-update
+          cat magento/composer.json
+
+#      - name: Build Magento Application
+#        env:
+#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+#        run: |
+#          echo "$AUTH_JSON" > magento/auth.json
+#          make env composer-json composer-auth mysql-config mage-work-dir composer-install mage-install flush-all up
+#
+#      - name: List Magento Application
+#        if: always()
+#        run: |
+#          make status
+
+
+
+
+
 
 
 
@@ -79,25 +107,15 @@ jobs:
 #          echo "$AUTH_JSON" > auth.json
 #          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-suggest
 #
-#      - name: Init Composer Private Repositories
-#        run: |
-#          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+
 #
-#      - name: Retrieve Composer Name and Version of Module
-#        id: extension-info
-#        working-directory: ${{ env.EXTENSION_PATH }}
-#        run: |
-#          EXTENSION_NAME=`composer show -s --name-only`
-#          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
-#          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
-#          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+
 #
 #      - name: Init Composer Local Repository
 #        run: |
 #          composer config repositories.${{ steps.extension-info.outputs.name }} path ${{ env.EXTENSION_PATH }}
 #
-#      - name: Composer Require Module
-#        run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
+
 #
 #      - name: Build Magento
 #        run: |
