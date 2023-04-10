@@ -68,8 +68,8 @@ jobs:
       - name: List Magento Application
         if: always()
         run: |
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml run -T --rm deploy bin/n98 admin:user:create --admin-user "admin" --admin*** --admin-email "admin@gmail.com" --admin-firstname "Adriano" --admin-lastname "Celentano" --ansi
           ls -la magento
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm deploy bin/n98 admin:user:create --admin-user "admin" --admin*** --admin-email "admin@gmail.com" --admin-firstname "Adriano" --admin-lastname "Celentano" --ansi
           ls -la magento/bin
 
 
