@@ -1,0 +1,128 @@
+name: Coverage Test Integration
+run-name: PHPUnit Integration Testing
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    name: Build & Run Tests
+    runs-on: ubuntu-latest
+    env:
+      EXTENSION_PATH: extensions/Decima_TheBestModule
+    steps:
+      - name: Git Checkout Deployment Tool
+        uses: actions/checkout@v3
+        with:
+          repository: sergiy-decima/magento-local-deployment
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+
+      - name: Git Checkout Application
+        uses: actions/checkout@v3
+        with:
+          repository: sergiy-decima/magento-sample-project
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          path: magento
+
+      - name: Git Checkout Module
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.EXTENSION_PATH }}
+#
+#      - name: Install PHP
+#        uses: shivammathur/setup-php@v2
+#        with:
+#          php-version: 8.2
+#          tools: phpunit-bridge
+#          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
+#          coverage: xdebug
+#
+#      - name: Get Composer Cache Directory
+#        id: composer-cache
+#        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+#
+#      - name: Create Composer Cache
+#        id: cache-composer
+#        uses: actions/cache@v3
+#        with:
+#          path: ${{ steps.composer-cache.outputs.dir }}
+#          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+#          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Build Magento Application
+        env:
+          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+        run: |
+          echo "$AUTH_JSON" > magento/auth.json
+          make prepare build
+          ls -la
+          ls -la magento
+
+#      - name: Install Composer Dependencies
+#        env:
+#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+#        run: |
+#          echo "$AUTH_JSON" > auth.json
+#          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-suggest
+#
+#      - name: Init Composer Private Repositories
+#        run: |
+#          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+#
+#      - name: Retrieve Composer Name and Version of Module
+#        id: extension-info
+#        working-directory: ${{ env.EXTENSION_PATH }}
+#        run: |
+#          EXTENSION_NAME=`composer show -s --name-only`
+#          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
+#          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+#          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+#
+#      - name: Init Composer Local Repository
+#        run: |
+#          composer config repositories.${{ steps.extension-info.outputs.name }} path ${{ env.EXTENSION_PATH }}
+#
+#      - name: Composer Require Module
+#        run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
+#
+#      - name: Build Magento
+#        run: |
+#          ./bin/magento module:enable --all
+#          ./bin/magento setup:di:compile
+#
+#      - name: Execute Tests
+#        run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
+#
+#      - name: Upload Coverage XML
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage-xml
+#          path: ${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
+#
+#      - name: Upload Coverage HTML
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage-html
+#          path: ${{ env.EXTENSION_PATH }}/output/html
+#
+#  coverage:
+#    needs: build
+#    name: Check Coverage Summary
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Download Coverage XML
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: coverage-xml
+#
+#      - name: Coverage Summary Report
+#        id: clover_coverage
+#        uses: sergiy-decima/clover-coverage-action@1.0.0
+#        with:
+#          filename: clover-coverage.xml
+#          thresholds: '60-80'
+#          fail_if_low: true
