@@ -82,18 +82,21 @@ jobs:
 #          cat magento/composer.json
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
+      - name: Composer Install
+        run: |
+          bin/composer install --ansi --no-interaction --prefer-dist
+
       - name: Retrieve Composer Name and Version of Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
-          EXTENSION_NAME=`cat magento/composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+          EXTENSION_NAME=`cat composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
-          EXTENSION_VERSION=`cat magento/composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
       - name: Composer Require Module
         run: |
-          bin/composer install
           bin/composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
           cat magento/composer.json
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $PWD/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $PWD/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
