@@ -60,7 +60,7 @@ jobs:
         run: |
           while read line; do
             echo "$line" >> $GITHUB_ENV
-          done
+          done < .env
 
       - name: Init Composer Private Repositories
         run: |
