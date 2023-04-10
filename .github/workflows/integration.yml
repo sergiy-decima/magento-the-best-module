@@ -63,9 +63,15 @@ jobs:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > magento/auth.json
-          make prepare build
-          ls -la
+          make build
+
+      - name: List Magento Application
+        if: always()
+        run: |
           ls -la magento
+          ls -la magento/bin
+
+
 
 #      - name: Install Composer Dependencies
 #        env:
