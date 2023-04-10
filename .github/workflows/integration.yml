@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: |
           while read line; do
-            echo "$line" >> $GITHUB_ENV
+            [[ ${line:0:1} != "#" ]] && echo "$line" >> $GITHUB_ENV
           done < .env
 
       - name: Init Composer Private Repositories
