@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXTENSION_PATH: extensions/Decima_TheBestModule
+      MAGENTO_ROOT: /app
+      MAGENTO_DIR: magento
+      EXTENSIONS_DIR: extensions
+      DC_IMAGE_PHP_CLI_TAG: 8.2-cli-1.3.5
     steps:
       - name: Git Checkout Deployment Tool
         uses: actions/checkout@v3
@@ -54,13 +58,13 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/magento/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Import Environment
-        id: import-env
-        shell: bash
-        run: |
-          while read line; do
-            [[ ${line:0:1} != "#" ]] && echo "$line" >> $GITHUB_ENV
-          done < .env
+#      - name: Import Environment
+#        id: import-env
+#        shell: bash
+#        run: |
+#          while read line; do
+#            [[ ${line:0:1} != "#" ]] && echo "$line" >> $GITHUB_ENV
+#          done < .env
 
       - name: Init Composer Private Repositories
         run: |
