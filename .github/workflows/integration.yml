@@ -25,6 +25,7 @@ jobs:
       - name: Prepare Magento Settings
         run: |
           make prepare
+          ls -la
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -40,6 +41,7 @@ jobs:
 
       - name: Prepare Magento DB
         run: |
+          ls -la magento
           cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
           cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
 
