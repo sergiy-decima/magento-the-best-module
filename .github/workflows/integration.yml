@@ -93,7 +93,8 @@ jobs:
 
       - name: Composer Require Module
         run: |
-          bin/composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
+          bin/composer install
+          bin/composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
           cat magento/composer.json
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v $PWD/${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v $PWD/${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
 #          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v ${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }} -v ${{ env.EXTENSIONS_DIR }}:/${{ env.EXTENSIONS_DIR }} magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer install
