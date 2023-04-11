@@ -26,10 +26,10 @@ class Config
     /**
      * This method will verify if module is enabled
      *
-     * @param string|null $scopeCode
+     * @param string|int|null $scopeCode
      * @return bool
      */
-    public function isEnabled(string $scopeCode = null): bool
+    public function isEnabled(string|int $scopeCode = null): bool
     {
         return $this->scopeConfig->isSetFlag(self::XPATH_GENERAL_ENABLED, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $scopeCode);
     }

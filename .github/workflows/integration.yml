@@ -29,7 +29,7 @@ jobs:
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
-          repository: sergiy-decima/magento-sample-project
+          repository: sergiy-decima/magento-sample-project@develop
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
           path: ${{ env.MAGENTO_DIR }}
 
@@ -40,8 +40,8 @@ jobs:
 
       - name: Prepare Magento DB
         run: |
-          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-demo
-          cp ${{ env.EXTENSION_PATH }}/.github/dumps/test.dump.sql.gz mysql/dump-for-test
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-test
           make extensions
 
       - name: Create Composer Cache
@@ -80,12 +80,15 @@ jobs:
         run: |
           make env mysql-config mage-work-dir composer-install mage-install flush-all up
 
-      - name: List Magento Application
-        if: always()
+      - name: Copy Test Configuration
         run: |
-          make status
-          bin/composer show ${{ steps.extension-info.outputs.name }}
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc
 
+      - name: Execute Tests
+        run: |
+          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
+          cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
 
 
 
