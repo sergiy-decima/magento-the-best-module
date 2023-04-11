@@ -83,6 +83,7 @@ jobs:
 
       - name: Copy Test Configuration
         run: |
+          chmod -R 755 ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc
 
       - name: Execute Tests
