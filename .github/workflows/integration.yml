@@ -99,9 +99,6 @@ jobs:
         run: |
           make status
 
-      - name: Chmod Application
-        run: chmod -R 777 ${{ env.MAGENTO_DIR }}
-
       - name: Execute Tests
         run: |
           docker compose run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "vendor/bin/phpunit -c dev/tests/integration/phpunit.xml --testsuite Magento_Tests_Extensions"
