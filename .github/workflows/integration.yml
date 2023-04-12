@@ -41,8 +41,7 @@ jobs:
 
       - name: Prepare Magento DB
         run: |
-          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo
-          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-test
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo phpunit/dump
           make extensions
 
       - name: Create Composer Cache
@@ -83,9 +82,9 @@ jobs:
 
       - name: Copy Test Configuration
         run: |
-          cat ${{ env.EXTENSION_PATH }}/.github/autotest/etc/config-global.php > ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
-          cat ${{ env.EXTENSION_PATH }}/.github/autotest/etc/install-config-mysql.php > ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
-#          cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc
+          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
+          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
+          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 
       - name: Execute Tests
         run: |
