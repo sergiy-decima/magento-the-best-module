@@ -90,13 +90,17 @@ jobs:
         run: |
           make env mysql-config mage-work-dir composer-install mage-install flush-all up
 
+      - name: Environment Status
+        run: |
+          make status
+
       - name: Execute Tests
         run: |
           RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
-          echo $RUN_COMMAND
+          echo "$RUN_COMMAND"
           docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "ls -la dev/tests/integration/etc/"
-#          docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
-#          cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
+          cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
 
 
 
