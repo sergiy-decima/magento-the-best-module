@@ -100,7 +100,7 @@ jobs:
 
       - name: Execute Tests
         run: |
-          RUN_COMMAND="vendor/bin/phpunit -c ${{ env.MAGENTO_DIR }}/dev/tests/integration/phpunit.xml -vvv --testsuite \"Magento_Tests_Extensions\""
+          RUN_COMMAND="vendor/bin/phpunit -c dev/tests/integration/phpunit.xml -vvv --testsuite \"Magento_Tests_Extensions\""
           echo "$RUN_COMMAND"
           docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "ls -la dev/tests/integration/etc/"
           docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
