@@ -49,8 +49,10 @@ jobs:
 
       - name: Prepare Magento DataBase
         run: |
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/phpunit.xml ${{ env.MAGENTO_DIR }}/dev/tests/integration/
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz phpunit/dump
+          cat ${{ env.MAGENTO_DIR }}/dev/tests/integration/phpunit.xml
           ls -la phpunit/dump
 
       - name: Prepare Composer Extensions
@@ -98,11 +100,12 @@ jobs:
 
       - name: Execute Tests
         run: |
-          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
+          RUN_COMMAND="vendor/bin/phpunit -c ${{ env.MAGENTO_DIR }}/dev/tests/integration/phpunit.xml -vvv --testsuite \"Magento_Tests_Extensions\""
           echo "$RUN_COMMAND"
           docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "ls -la dev/tests/integration/etc/"
           docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
           cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
+#          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
 
 
 
