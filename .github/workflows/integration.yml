@@ -41,7 +41,8 @@ jobs:
 
       - name: Prepare Magento DB
         run: |
-          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo phpunit/dump
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz phpunit/dump
           make extensions
 
       - name: Create Composer Cache
