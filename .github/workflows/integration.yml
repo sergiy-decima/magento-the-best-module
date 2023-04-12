@@ -83,7 +83,9 @@ jobs:
 
       - name: Copy Test Configuration
         run: |
-          cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc
+          cat ${{ env.EXTENSION_PATH }}/.github/autotest/etc/config-global.php > ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
+          cat ${{ env.EXTENSION_PATH }}/.github/autotest/etc/install-config-mysql.php > ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
+#          cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc
 
       - name: Execute Tests
         run: |
