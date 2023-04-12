@@ -37,10 +37,10 @@ jobs:
       - name: Copy Test Configuration
         run: |
           mkdir -p ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
-          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
-          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
-          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
-          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+#          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
+#          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
+#          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+#          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 
       - name: Git Checkout Module
         uses: actions/checkout@v3
@@ -49,6 +49,7 @@ jobs:
 
       - name: Prepare Magento DataBase
         run: |
+          cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/phpunit.xml ${{ env.MAGENTO_DIR }}/dev/tests/integration/
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz phpunit/dump
