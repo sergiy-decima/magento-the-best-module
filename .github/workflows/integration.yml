@@ -83,16 +83,18 @@ jobs:
 
       - name: Copy Test Configuration
         run: |
-          chmod -R 777 ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
-          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
-          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
-          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
-
-      - name: Execute Tests
-        run: |
-          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
-          cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
+          make test
+          ls -la ${{ env.MAGENTO_DIR }}
+#          chmod -R 777 ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
+#          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
+#          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
+#          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+#
+#      - name: Execute Tests
+#        run: |
+#          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
+#          docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "$RUN_COMMAND"
+#          cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
 
 
 
