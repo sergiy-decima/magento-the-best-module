@@ -40,6 +40,7 @@ jobs:
           cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
           cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
           cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 
       - name: Git Checkout Module
         uses: actions/checkout@v3
@@ -50,6 +51,7 @@ jobs:
         run: |
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-for-demo
           cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz phpunit/dump
+          ls -la phpunit/dump
 
       - name: Prepare Composer Extensions
         run: make extensions
