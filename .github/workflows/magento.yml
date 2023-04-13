@@ -1,0 +1,173 @@
+name: Magento Coverage Test Integration
+run-name: Magento PHPUnit Integration Testing
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    name: Build & Run Tests
+    runs-on: ubuntu-latest
+    container: magento/magento-cloud-docker-php:8.2-cli-1.3.5
+
+
+
+
+
+#    env:
+#      EXTENSION_PATH: extensions/Decima_TheBestModule
+#      MAGENTO_DIR: magento
+#    steps:
+#      - name: Git Checkout Deployment Tool
+#        uses: actions/checkout@v3
+#        with:
+#          repository: sergiy-decima/magento-local-deployment
+#          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+#
+#      - name: Prepare Magento Settings
+#        run: |
+#          make prepare
+#
+#      - name: Git Checkout Application
+#        uses: actions/checkout@v3
+#        with:
+#          repository: sergiy-decima/magento-sample-project
+#          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+#          path: ${{ env.MAGENTO_DIR }}
+#          ref: develop
+#
+#      - name: Copy Test Configuration
+#        run: |
+#          mkdir -p ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
+##          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
+##          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
+##          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+##          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+#
+#      - name: Git Checkout Module
+#        uses: actions/checkout@v3
+#        with:
+#          path: ${{ env.EXTENSION_PATH }}
+#
+#      - name: Prepare Magento DataBase
+#        run: |
+#          cp ${{ env.EXTENSION_PATH }}/.github/autotest/etc/* ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
+#          cp ${{ env.EXTENSION_PATH }}/.github/autotest/phpunit.xml ${{ env.MAGENTO_DIR }}/dev/tests/integration/
+#          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz mysql/dump-to-import
+#          cp ${{ env.EXTENSION_PATH }}/.github/autotest/test.dump.sql.gz phpunit/dump-to-import
+#          cat ${{ env.MAGENTO_DIR }}/dev/tests/integration/phpunit.xml
+#          ls -la phpunit/dump
+#
+#      - name: Prepare Composer Extensions
+#        run: make extensions
+#
+#      - name: Create Composer Cache
+#        id: cache-composer
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.composer/cache
+#          key: ${{ runner.os }}-composer-${{ hashFiles('**/${{ env.MAGENTO_DIR }}/composer.lock') }}
+#          restore-keys: ${{ runner.os }}-composer-
+#
+#      - name: Init Composer Private Repositories
+#        run: |
+#          bin/composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+#
+#      - name: Composer Install
+#        env:
+#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+#        run: |
+#          echo "$AUTH_JSON" > $PWD/${{ env.MAGENTO_DIR }}/auth.json
+#          bin/composer install --ansi --no-interaction --prefer-dist
+#
+#      - name: Retrieve Composer Name and Version of Module
+#        id: extension-info
+#        working-directory: ${{ env.EXTENSION_PATH }}
+#        run: |
+#          EXTENSION_NAME=`cat composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+#          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
+#          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+#          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+#
+#      - name: Local Require Module
+#        run: |
+#          bin/composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
+#
+#      - name: Build Magento Application
+#        run: |
+#          make env mysql-config mage-work-dir composer-install mage-install flush-all up
+#
+#      - name: Environment Status
+#        run: |
+#          make status
+#
+#      - name: Execute Tests
+#        run: |
+#          docker compose run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "vendor/bin/phpunit -c dev/tests/integration/phpunit.xml --testsuite Magento_Tests_Extensions"
+#          cat ${{ env.MAGENTO_DIR }}/reports/coverage.txt
+#          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
+
+
+
+
+
+
+
+#      - name: Install Composer Dependencies
+#        env:
+#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+#        run: |
+#          echo "$AUTH_JSON" > auth.json
+#          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-suggest
+#
+
+#
+
+#
+#      - name: Init Composer Local Repository
+#        run: |
+#          composer config repositories.${{ steps.extension-info.outputs.name }} path ${{ env.EXTENSION_PATH }}
+#
+
+#
+#      - name: Build Magento
+#        run: |
+#          ./bin/magento module:enable --all
+#          ./bin/magento setup:di:compile
+#
+#      - name: Execute Tests
+#        run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
+#
+#      - name: Upload Coverage XML
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage-xml
+#          path: ${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
+#
+#      - name: Upload Coverage HTML
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: coverage-html
+#          path: ${{ env.EXTENSION_PATH }}/output/html
+#
+#  coverage:
+#    needs: build
+#    name: Check Coverage Summary
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Download Coverage XML
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: coverage-xml
+#
+#      - name: Coverage Summary Report
+#        id: clover_coverage
+#        uses: sergiy-decima/clover-coverage-action@1.0.0
+#        with:
+#          filename: clover-coverage.xml
+#          thresholds: '60-80'
+#          fail_if_low: true
