@@ -83,7 +83,7 @@ jobs:
           MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
           MAGENTO_RUN_MODE: ${{ env.MAGENTO_RUN_MODE }}
           PHP_EXTENSIONS: "${{ env.PHP_EXTENSIONS }}"
-          SENDMAIL_PATH: ""${{ env.SENDMAIL_PATH }}"
+          SENDMAIL_PATH: "${{ env.SENDMAIL_PATH }}"
         working-directory: ${{ env.MAGENTO_DIR }}
         run: |
           echo "$AUTH_JSON" > auth.json
