@@ -13,10 +13,13 @@ jobs:
     name: Build & Run Tests
     runs-on: ubuntu-latest
     container: magento/magento-cloud-docker-php:8.2-cli-1.3.5
-
     env:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
+      MAGENTO_ROOT: /app
+      MAGENTO_RUN_MODE: developer
+      PHP_EXTENSIONS: "bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium"
+      SENDMAIL_PATH: "/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
@@ -77,6 +80,10 @@ jobs:
       - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
+          MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
+          MAGENTO_RUN_MODE: ${{ env.MAGENTO_RUN_MODE }}
+          PHP_EXTENSIONS: ${{ env.PHP_EXTENSIONS }}
+          SENDMAIL_PATH: ${{ env.SENDMAIL_PATH }}
         working-directory: ${{ env.MAGENTO_DIR }}
         run: |
           echo "$AUTH_JSON" > auth.json
