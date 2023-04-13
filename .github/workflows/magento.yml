@@ -22,12 +22,12 @@ jobs:
       env:
         MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
         MAGENTO_RUN_MODE: developer
-        PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium
+        PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
+        XDEBUG_MODE: coverage
         SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
       volumes:
         - magento:/app:delegated
         - extensions:/extensions:delegated
-        - ~/.composer/cache:/composer/cache
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
