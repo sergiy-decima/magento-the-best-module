@@ -26,7 +26,7 @@ jobs:
         XDEBUG_MODE: coverage
         SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
       volumes:
-        - magento:/app:delegated
+        - .:/app:delegated
         - extensions:/extensions:delegated
     steps:
 #      - name: Git Checkout Deployment Tool
@@ -39,15 +39,13 @@ jobs:
 #        run: |
 #          make prepare
 #
-      - name: List Dir
-        run: php -v
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-          path: ${{ env.MAGENTO_DIR }}
+#          path: ${{ env.MAGENTO_DIR }}
           ref: develop
 
 #      - name: Copy Test Configuration
