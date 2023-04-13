@@ -14,19 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     container: magento/magento-cloud-docker-php:8.2-cli-1.3.5
 
-
-
-
-
-#    env:
-#      EXTENSION_PATH: extensions/Decima_TheBestModule
-#      MAGENTO_DIR: magento
-#    steps:
-#      - name: Git Checkout Deployment Tool
-#        uses: actions/checkout@v3
-#        with:
-#          repository: sergiy-decima/magento-local-deployment
-#          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+    env:
+      EXTENSION_PATH: extensions/Decima_TheBestModule
+      MAGENTO_DIR: magento
+    steps:
+      - name: Git Checkout Deployment Tool
+        uses: actions/checkout@v3
+        with:
+          repository: sergiy-decima/magento-local-deployment
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
 #
 #      - name: Prepare Magento Settings
 #        run: |
