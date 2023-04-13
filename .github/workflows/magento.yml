@@ -15,7 +15,7 @@ jobs:
     env:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
-      MAGENTO_ROOT: root
+      MAGENTO_ROOT: /app
       EXTENSIONS_DIR: extensions
     container:
       image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
@@ -26,8 +26,8 @@ jobs:
         XDEBUG_MODE: coverage
         SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
       volumes:
-        - .:/app:delegated
-        - extensions:/extensions:delegated
+        - ${{ env.MAGENTO_DIR }}:/app:delegated
+        - ${{ env.EXTENSIONS_DIR }}:/extensions:delegated
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
@@ -45,7 +45,7 @@ jobs:
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-#          path: ${{ env.MAGENTO_DIR }}
+          path: ${{ env.MAGENTO_DIR }}
           ref: develop
 
 #      - name: Copy Test Configuration
@@ -91,13 +91,13 @@ jobs:
 #        run: |
 #          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 #
-#      - name: Composer Install
-#        env:
-#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
-#        working-directory: ${{ env.MAGENTO_DIR }}
-#        run: |
-#          echo "$AUTH_JSON" > auth.json
-#          composer install --ansi --no-interaction --prefer-dist
+      - name: Composer Install
+        env:
+          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+        working-directory: ${{ env.MAGENTO_DIR }}
+        run: |
+          echo "$AUTH_JSON" > auth.json
+          composer install --ansi --no-interaction --prefer-dist
 
 
 #
