@@ -39,6 +39,9 @@ jobs:
 #        run: |
 #          make prepare
 #
+      - name: List Dir
+        run: ls -la
+
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
@@ -59,6 +62,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: ${{ env.EXTENSION_PATH }}
+
+      - name: List Dir
+        run: ls -la
 #
 #      - name: Prepare Magento DataBase
 #        run: |
@@ -80,18 +86,22 @@ jobs:
 #          key: ${{ runner.os }}-composer-${{ hashFiles('**/${{ env.MAGENTO_DIR }}/composer.lock') }}
 #          restore-keys: ${{ runner.os }}-composer-
 
-      - name: Init Composer Private Repositories
-        working-directory: ${{ env.MAGENTO_DIR }}
-        run: |
-          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
-      - name: Composer Install
-        env:
-          AUTH_JSON: ${{ secrets.AUTH_JSON }}
-        working-directory: ${{ env.MAGENTO_DIR }}
-        run: |
-          echo "$AUTH_JSON" > auth.json
-          composer install --ansi --no-interaction --prefer-dist
+
+#      - name: Init Composer Private Repositories
+#        working-directory: ${{ env.MAGENTO_DIR }}
+#        run: |
+#          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+#
+#      - name: Composer Install
+#        env:
+#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+#        working-directory: ${{ env.MAGENTO_DIR }}
+#        run: |
+#          echo "$AUTH_JSON" > auth.json
+#          composer install --ansi --no-interaction --prefer-dist
+
+
 #
 #      - name: Retrieve Composer Name and Version of Module
 #        id: extension-info
