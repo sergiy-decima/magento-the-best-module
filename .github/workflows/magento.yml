@@ -18,24 +18,24 @@ jobs:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
     steps:
-      - name: Git Checkout Deployment Tool
-        uses: actions/checkout@v3
-        with:
-          repository: sergiy-decima/magento-local-deployment
-          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+#      - name: Git Checkout Deployment Tool
+#        uses: actions/checkout@v3
+#        with:
+#          repository: sergiy-decima/magento-local-deployment
+#          token: ${{ secrets.REPO_GITHUB_TOKEN }}
 #
 #      - name: Prepare Magento Settings
 #        run: |
 #          make prepare
 #
-#      - name: Git Checkout Application
-#        uses: actions/checkout@v3
-#        with:
-#          repository: sergiy-decima/magento-sample-project
-#          token: ${{ secrets.REPO_GITHUB_TOKEN }}
-#          path: ${{ env.MAGENTO_DIR }}
-#          ref: develop
-#
+      - name: Git Checkout Application
+        uses: actions/checkout@v3
+        with:
+          repository: sergiy-decima/magento-sample-project
+          token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          path: ${{ env.MAGENTO_DIR }}
+          ref: develop
+
 #      - name: Copy Test Configuration
 #        run: |
 #          mkdir -p ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
@@ -44,10 +44,10 @@ jobs:
 ##          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 ##          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 #
-#      - name: Git Checkout Module
-#        uses: actions/checkout@v3
-#        with:
-#          path: ${{ env.EXTENSION_PATH }}
+      - name: Git Checkout Module
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.EXTENSION_PATH }}
 #
 #      - name: Prepare Magento DataBase
 #        run: |
@@ -68,17 +68,19 @@ jobs:
 #          path: ~/.composer/cache
 #          key: ${{ runner.os }}-composer-${{ hashFiles('**/${{ env.MAGENTO_DIR }}/composer.lock') }}
 #          restore-keys: ${{ runner.os }}-composer-
-#
-#      - name: Init Composer Private Repositories
-#        run: |
-#          bin/composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
-#
-#      - name: Composer Install
-#        env:
-#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
-#        run: |
-#          echo "$AUTH_JSON" > $PWD/${{ env.MAGENTO_DIR }}/auth.json
-#          bin/composer install --ansi --no-interaction --prefer-dist
+
+      - name: Init Composer Private Repositories
+        working-directory: ${{ env.MAGENTO_DIR }}
+        run: |
+          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+
+      - name: Composer Install
+        env:
+          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+        working-directory: ${{ env.MAGENTO_DIR }}
+        run: |
+          echo "$AUTH_JSON" > auth.json
+          composer install --ansi --no-interaction --prefer-dist
 #
 #      - name: Retrieve Composer Name and Version of Module
 #        id: extension-info

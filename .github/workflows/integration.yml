@@ -2,7 +2,7 @@ name: Coverage Test Integration
 run-name: PHPUnit Integration Testing
 
 on:
-  push:
+#  push:
   workflow_dispatch:
   pull_request:
     paths-ignore:
