@@ -25,8 +25,8 @@ jobs:
         PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium
         SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
       volumes:
-        ./${{ env.MAGENTO_DIR }}:${{ env.MAGENTO_ROOT }}:delegated
-        ./${{ env.EXTENSIONS_DIR }}:/extensions:delegated
+        ./magento:${{ env.MAGENTO_ROOT }}:delegated
+        ./extensions:/extensions:delegated
         ~/.composer/cache:/composer/cache
     steps:
 #      - name: Git Checkout Deployment Tool
