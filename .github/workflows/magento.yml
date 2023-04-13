@@ -26,8 +26,8 @@ jobs:
         XDEBUG_MODE: coverage
         SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
       volumes:
-        - ${{ env.MAGENTO_DIR }}:/app:delegated
-        - ${{ env.EXTENSIONS_DIR }}:/extensions:delegated
+        - magento:/app:delegated
+        - extensions:/extensions:delegated
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
@@ -62,7 +62,7 @@ jobs:
           path: ${{ env.EXTENSION_PATH }}
 
       - name: List Dir
-        run: ls -la
+        run: ls -la magento
 #
 #      - name: Prepare Magento DataBase
 #        run: |
