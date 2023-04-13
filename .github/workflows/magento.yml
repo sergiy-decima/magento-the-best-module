@@ -94,7 +94,12 @@ jobs:
       - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
-        working-directory: ${{ env.MAGENTO_DIR }}
+          MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
+          MAGENTO_RUN_MODE: developer
+          PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
+          XDEBUG_MODE: coverage
+          SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
+#        working-directory: ${{ env.MAGENTO_DIR }}
         run: |
           echo "$AUTH_JSON" > auth.json
           composer install --ansi --no-interaction --prefer-dist
