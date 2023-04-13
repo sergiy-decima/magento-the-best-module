@@ -40,7 +40,7 @@ jobs:
 #          make prepare
 #
       - name: List Dir
-        run: ls -la
+        run: php -v
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
