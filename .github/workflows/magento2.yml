@@ -118,7 +118,7 @@ jobs:
         run: docker ps -a
 
       - name: Show Container Statuses
-        run: docker exec deploy bash -c "pwd && ls -la"
+        run: docker exec -i deploy bash -c "pwd && ls -la"
 
 ##      - name: Copy Test Configuration
 ##        run: |
