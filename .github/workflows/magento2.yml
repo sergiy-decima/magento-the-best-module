@@ -32,13 +32,21 @@ jobs:
       MAGENTO_DIR: magento
       MAGENTO_ROOT: /app
       DC_IMAGE_PHP_CLI_RUN_OPTIONS: |
-        -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
-        -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
-        -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
-        -e "PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}" \
-        -e "XDEBUG_MODE=${{ env.XDEBUG_MODE }}" \
-        -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} \
+        -e "MAGENTO_ROOT=/app" \
+        -e "MAGENTO_RUN_MODE=developer" \
+        -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025" \
+        -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug" \
+        -e "XDEBUG_MODE=coverage" \
+        -v ${{ github.workspace }}:/app \
         -v ~/.composer/cache:/composer/cache
+#      DC_IMAGE_PHP_CLI_RUN_OPTIONS: |
+#        -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
+#        -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
+#        -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
+#        -e "PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}" \
+#        -e "XDEBUG_MODE=${{ env.XDEBUG_MODE }}" \
+#        -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} \
+#        -v ~/.composer/cache:/composer/cache
 #    container:
 #      image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
 #      env:
