@@ -237,8 +237,7 @@ jobs:
         run: |
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
-          docker run --rm --network ${{ steps.network-info.outputs.name }} \
-            ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
+          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
             -e "INPUT_DB_HOST=db" \
             -e "INPUT_DB_USER=${{ env.MYSQL_USER }}" \
             -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}" \
@@ -249,11 +248,11 @@ jobs:
             -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}" \
             -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}" \
             -e "INPUT_AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
-            ${{ env.DC_IMAGE_PHP_CLI }} \
-              vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml ${{ env.EXTENSION_PATH }} \
+            ${{ env.DC_IMAGE_PHP_CLI }} bash -c \
+              "cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv ../../../${{ env.EXTENSION_PATH }} \
                 --coverage-html=../../../reports/html \
                 --coverage-clover=../../../reports/clover.coverage.xml \
-                --coverage-text=../../../reports/coverage.txt
+                --coverage-text=../../../reports/coverage.txt"
           test -f reports/coverage.txt && cat reports/coverage.txt
 #          vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml \
 #            --testsuite Magento_Tests_Extensions \
