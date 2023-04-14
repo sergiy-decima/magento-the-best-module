@@ -218,16 +218,16 @@ jobs:
 
       - name: Execute Tests
         env:
-          DB_HOST: localhost:${{ job.services.db.ports[3306] }}
-          DB_USER: ${{ env.MYSQL_USER }}
-          DB_PASSWORD: ${{ env.MYSQL_PASSWORD }}
-          DB_NAME: ${{ env.MYSQL_DATABASE }}
-          OPENSEARCH_HOST: localhost
-          OPENSEARCH_PORT: ${{ job.services.opensearch.ports[9200] }}
-          AMQP_HOST: localhost
-          AMQP_PORT: ${{ job.services.rabbitmq.ports[5672] }}
-          AMQP_USER: ${{ env.AMQP_USER }}
-          AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}
+          INPUT_DB_HOST: localhost:${{ job.services.db.ports[3306] }}
+          INPUT_DB_USER: ${{ env.MYSQL_USER }}
+          INPUT_DB_PASSWORD: ${{ env.MYSQL_PASSWORD }}
+          INPUT_DB_NAME: ${{ env.MYSQL_DATABASE }}
+          INPUT_OPENSEARCH_HOST: localhost
+          INPUT_OPENSEARCH_PORT: ${{ job.services.opensearch.ports[9200] }}
+          INPUT_AMQP_HOST: localhost
+          INPUT_AMQP_PORT: ${{ job.services.rabbitmq.ports[5672] }}
+          INPUT_AMQP_USER: ${{ env.AMQP_USER }}
+          INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}
         run: |
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
