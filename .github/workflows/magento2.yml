@@ -115,7 +115,7 @@ jobs:
           path: ${{ env.EXTENSION_PATH }}
 
       - name: Show Container Statuses
-        run: docker ps
+        run: docker ps -a
 
       - name: Show Container Statuses
         run: docker run -rm deploy bash -c "pwd && ls -la"
