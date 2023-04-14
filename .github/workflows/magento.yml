@@ -34,6 +34,8 @@ jobs:
         image: mariadb:10.4
         ports:
           - 3306
+        volumes:
+          - ${{ EXTENSION_PATH }}/Test/Integration/dump:/docker-entrypoint-initdb.d
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_USER: magento
@@ -90,7 +92,7 @@ jobs:
         run: |
           docker ps -a
           pwd
-          ls -la
+          ls -la ${{ EXTENSION_PATH }}/Test/Integration/dump
 
 #
 #      - name: Prepare Magento DataBase
