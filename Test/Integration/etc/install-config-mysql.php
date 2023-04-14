@@ -1,5 +1,8 @@
 <?php
 
+print_r($_ENV);
+print_r($_REQUEST);
+print_r($_SERVER);
 return [
     'db-host' => $_ENV['DB_HOST'],
     'db-user' => $_ENV['DB_USER'],
