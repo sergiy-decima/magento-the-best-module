@@ -114,155 +114,161 @@ jobs:
         with:
           path: ${{ env.EXTENSION_PATH }}
 
-#      - name: Copy Test Configuration
-#        run: |
-#          mkdir -p ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
-##          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
-##          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
-##          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
-##          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
-
-      - name: Import Data to Database
-        run: |
-          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
-
-      - name: Init Composer Private Repositories
-        run: |
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v `pwd`:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
-
-      - name: Composer Install
-        env:
-          AUTH_JSON: ${{ secrets.AUTH_JSON }}
-        run: |
-          echo "$AUTH_JSON" > auth.json
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v `pwd`:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer install --ansi --no-interaction --prefer-dist
-
-      - name: Retrieve Composer Name and Version of Module
-        id: extension-info
-        working-directory: ${{ env.EXTENSION_PATH }}
-        run: |
-          EXTENSION_NAME=`cat composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
-          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
-          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
-          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Local Require Module
-        run: |
-          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v `pwd`:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
-
       - name: Show Container Statuses
         run: docker ps
 
-      - name: Build Magento Application
-        run: |
-          docker run --rm \
-            -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
-            -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
-            -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
-            -v `pwd`:${{ env.MAGENTO_ROOT }} \
-            -v ~/.composer/cache:/composer/cache \
-            magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bin/magento setup:config:set \
-              --db-host=db \
-              --db-name=${{ env.MYSQL_DATABASE }} \
-              --db-user=${{ env.MYSQL_USER }} \
-              --db-password=${{ env.MYSQL_PASSWORD }} \
-              --session-save=redis \
-              --session-save-redis-host=redis \
-              --session-save-redis-port=${{ job.services.redis.ports[6379] }} \
-              --session-save-redis-db=0 \
-              --cache-backend=redis \
-              --cache-backend-redis-server=redis \
-              --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} \
-              --cache-backend-redis-db=1 \
-              --page-cache=redis \
-              --page-cache-redis-server=redis \
-              --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
-              --page-cache-redis-db=2 \
-              --page-cache-redis-compress-data=0
-          docker run --rm \
-            -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
-            -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
-            -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
-            -v `pwd`:${{ env.MAGENTO_ROOT }} \
-            -v ~/.composer/cache:/composer/cache \
-            magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bin/magento setup:install \
-            --db-host=db \
-            --db-name=${{ env.MYSQL_DATABASE }} \
-            --db-user=${{ env.MYSQL_USER }} \
-            --db-password=${{ env.MYSQL_PASSWORD }} \
-            --use-secure=0 \
-            --use-secure-admin=1 \
-            --base-url=http://magento2.test/ \
-            --base-url-secure=https://magento2.test/ \
-            --admin-user=admin \
-            --admin-password=123123q \
-            --admin-firstname=Adriano \
-            --admin-lastname=Celentano \
-            --admin-email=admin@gmail.com \
-            --backend-frontname=admin \
-            --language=en_US \
-            --currency=USD \
-            --timezone=America/Los_Angeles \
-            --use-rewrites=1 \
-            --search-engine=opensearch \
-            --opensearch-host=opensearch \
-            --opensearch-port=${{ job.services.opensearch.ports[9200] }} \
-            --magento-init-params="MAGE_MODE=developer" \
-            --disable-modules=Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth \
-            --amqp-host=rabbitmq \
-            --amqp-port=${{ job.services.rabbitmq.ports[5672] }} \
-            --amqp-user=${{ env.AMQP_USER }} \
-            --amqp-password=${{ env.AMQP_PASSWORD }} \
-            --amqp-virtualhost=/
+      - name: Show Container Statuses
+        run: docker run -rm deploy bash -c "pwd && ls -la"
 
-      - name: Check Parameters
-        run: |
-          ls -la dev/tests/integration/framework/Magento/TestFramework
-
-      - name: Execute Tests
-        env:
-          INPUT_DB_HOST: db
-          INPUT_DB_USER: ${{ env.MYSQL_USER }}
-          INPUT_DB_PASSWORD: ${{ env.MYSQL_PASSWORD }}
-          INPUT_DB_NAME: ${{ env.MYSQL_DATABASE }}
-          INPUT_OPENSEARCH_HOST: opensearch
-          INPUT_OPENSEARCH_PORT: ${{ job.services.opensearch.ports[9200] }}
-          INPUT_AMQP_HOST: rabbitmq
-          INPUT_AMQP_PORT: ${{ job.services.rabbitmq.ports[5672] }}
-          INPUT_AMQP_USER: ${{ env.AMQP_USER }}
-          INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}
-        run: |
-          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
-          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
-          docker run --rm \
-            -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
-            -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
-            -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
-            -e "INPUT_DB_HOST=db"
-            -e "INPUT_DB_USER=${{ env.MYSQL_USER }}"
-            -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}"
-            -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}"
-            -e "INPUT_OPENSEARCH_HOST=opensearch"
-            -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}"
-            -e "INPUT_AMQP_HOST=rabbitmq"
-            -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}"
-            -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}"
-            -e "INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}" \
-            -v `pwd`:${{ env.MAGENTO_ROOT }} \
-            -v ~/.composer/cache:/composer/cache \
-            magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml ${{ env.EXTENSION_PATH }} \
-              --coverage-html=../../../reports/html \
-              --coverage-clover=../../../reports/clover.coverage.xml \
-              --coverage-text=../../../reports/coverage.txt
-          test -f reports/coverage.txt && cat reports/coverage.txt
-#          vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml \
-#            --testsuite Magento_Tests_Extensions \
-#            --coverage-html=../../../reports/html \
-#            --coverage-clover=../../../reports/clover.coverage.xml \
-#            --coverage-text=../../../reports/coverage.txt
+##      - name: Copy Test Configuration
+##        run: |
+##          mkdir -p ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
+###          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
+###          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
+###          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+###          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
+#
+#      - name: Import Data to Database
+#        run: |
+#          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
+#
+#      - name: Init Composer Private Repositories
+#        run: |
+#          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v `pwd`:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+#
+#      - name: Composer Install
+#        env:
+#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+#        run: |
+#          echo "$AUTH_JSON" > auth.json
+#          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v `pwd`:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} composer install --ansi --no-interaction --prefer-dist
+#
+#      - name: Retrieve Composer Name and Version of Module
+#        id: extension-info
+#        working-directory: ${{ env.EXTENSION_PATH }}
+#        run: |
+#          EXTENSION_NAME=`cat composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+#          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
+#          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+#          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+#
+#      - name: Local Require Module
+#        run: |
+#          docker run --rm -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -v `pwd`:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
+#
+#      - name: Show Container Statuses
+#        run: docker ps
+#
+#      - name: Build Magento Application
+#        run: |
+#          docker run --rm \
+#            -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
+#            -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
+#            -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
+#            -v `pwd`:${{ env.MAGENTO_ROOT }} \
+#            -v ~/.composer/cache:/composer/cache \
+#            magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bin/magento setup:config:set \
+#              --db-host=db \
+#              --db-name=${{ env.MYSQL_DATABASE }} \
+#              --db-user=${{ env.MYSQL_USER }} \
+#              --db-password=${{ env.MYSQL_PASSWORD }} \
+#              --session-save=redis \
+#              --session-save-redis-host=redis \
+#              --session-save-redis-port=${{ job.services.redis.ports[6379] }} \
+#              --session-save-redis-db=0 \
+#              --cache-backend=redis \
+#              --cache-backend-redis-server=redis \
+#              --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} \
+#              --cache-backend-redis-db=1 \
+#              --page-cache=redis \
+#              --page-cache-redis-server=redis \
+#              --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
+#              --page-cache-redis-db=2 \
+#              --page-cache-redis-compress-data=0
+#          docker run --rm \
+#            -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
+#            -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
+#            -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
+#            -v `pwd`:${{ env.MAGENTO_ROOT }} \
+#            -v ~/.composer/cache:/composer/cache \
+#            magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bin/magento setup:install \
+#            --db-host=db \
+#            --db-name=${{ env.MYSQL_DATABASE }} \
+#            --db-user=${{ env.MYSQL_USER }} \
+#            --db-password=${{ env.MYSQL_PASSWORD }} \
+#            --use-secure=0 \
+#            --use-secure-admin=1 \
+#            --base-url=http://magento2.test/ \
+#            --base-url-secure=https://magento2.test/ \
+#            --admin-user=admin \
+#            --admin-password=123123q \
+#            --admin-firstname=Adriano \
+#            --admin-lastname=Celentano \
+#            --admin-email=admin@gmail.com \
+#            --backend-frontname=admin \
+#            --language=en_US \
+#            --currency=USD \
+#            --timezone=America/Los_Angeles \
+#            --use-rewrites=1 \
+#            --search-engine=opensearch \
+#            --opensearch-host=opensearch \
+#            --opensearch-port=${{ job.services.opensearch.ports[9200] }} \
+#            --magento-init-params="MAGE_MODE=developer" \
+#            --disable-modules=Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth \
+#            --amqp-host=rabbitmq \
+#            --amqp-port=${{ job.services.rabbitmq.ports[5672] }} \
+#            --amqp-user=${{ env.AMQP_USER }} \
+#            --amqp-password=${{ env.AMQP_PASSWORD }} \
+#            --amqp-virtualhost=/
+#
+#      - name: Check Parameters
+#        run: |
+#          ls -la dev/tests/integration/framework/Magento/TestFramework
+#
+#      - name: Execute Tests
+#        env:
+#          INPUT_DB_HOST: db
+#          INPUT_DB_USER: ${{ env.MYSQL_USER }}
+#          INPUT_DB_PASSWORD: ${{ env.MYSQL_PASSWORD }}
+#          INPUT_DB_NAME: ${{ env.MYSQL_DATABASE }}
+#          INPUT_OPENSEARCH_HOST: opensearch
+#          INPUT_OPENSEARCH_PORT: ${{ job.services.opensearch.ports[9200] }}
+#          INPUT_AMQP_HOST: rabbitmq
+#          INPUT_AMQP_PORT: ${{ job.services.rabbitmq.ports[5672] }}
+#          INPUT_AMQP_USER: ${{ env.AMQP_USER }}
+#          INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}
+#        run: |
+#          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
+#          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
+#          docker run --rm \
+#            -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
+#            -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
+#            -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
+#            -e "INPUT_DB_HOST=db"
+#            -e "INPUT_DB_USER=${{ env.MYSQL_USER }}"
+#            -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}"
+#            -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}"
+#            -e "INPUT_OPENSEARCH_HOST=opensearch"
+#            -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}"
+#            -e "INPUT_AMQP_HOST=rabbitmq"
+#            -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}"
+#            -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}"
+#            -e "INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}" \
+#            -v `pwd`:${{ env.MAGENTO_ROOT }} \
+#            -v ~/.composer/cache:/composer/cache \
+#            magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml ${{ env.EXTENSION_PATH }} \
+#              --coverage-html=../../../reports/html \
+#              --coverage-clover=../../../reports/clover.coverage.xml \
+#              --coverage-text=../../../reports/coverage.txt
 #          test -f reports/coverage.txt && cat reports/coverage.txt
-#          docker compose run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "vendor/bin/phpunit -c dev/tests/integration/phpunit.xml --testsuite Magento_Tests_Extensions"
-#          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
+##          vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml \
+##            --testsuite Magento_Tests_Extensions \
+##            --coverage-html=../../../reports/html \
+##            --coverage-clover=../../../reports/clover.coverage.xml \
+##            --coverage-text=../../../reports/coverage.txt
+##          test -f reports/coverage.txt && cat reports/coverage.txt
+##          docker compose run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "vendor/bin/phpunit -c dev/tests/integration/phpunit.xml --testsuite Magento_Tests_Extensions"
+##          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
 
 
 
