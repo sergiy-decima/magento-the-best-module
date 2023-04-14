@@ -8,6 +8,12 @@ on:
     paths-ignore:
       - '**.md'
 
+env:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_USER: magento
+  MYSQL_PASSWORD: magento
+  MYSQL_DATABASE: magento
+
 jobs:
   build:
     name: Build & Run Tests
@@ -37,11 +43,11 @@ jobs:
 #        volumes:
 #          - ${{ github.workspace }}/extensions/Decima_TheBestModule/Test/Integration/dump:/docker-entrypoint-initdb.d
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: magento
-          MYSQL_PASSWORD: magento
-          MYSQL_DATABASE: magento
-        options: --name mariadb --health-cmd="mysqladmin ping -h localhost -pmagento" --health-interval=5s --health-timeout=2s --health-retries=3
+          MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+          MYSQL_USER: $MYSQL_USER
+          MYSQL_PASSWORD: $MYSQL_PASSWORD
+          MYSQL_DATABASE: $MYSQL_DATABASE
+        options: --name mariadb --health-cmd="mysqladmin ping -h localhost -p$MYSQL_PASSWORD" --health-interval=5s --health-timeout=2s --health-retries=3
       redis:
         image: redis
         ports:
@@ -81,10 +87,10 @@ jobs:
 
       - name: Import Data to Database
         run: |
-          docker ps
-          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento
-          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento -e "SHOW TABLES"
+#          docker ps
+#          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
+#          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento -e "SHOW TABLES"
 #          sudo apt-get install -y mysql-client libmysqlclient-dev
 #          mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento -e "SHOW DATABASES"
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento magento
