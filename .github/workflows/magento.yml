@@ -32,7 +32,6 @@ jobs:
     services:
       db:
         image: mariadb:10.4
-        container_name: mariadb
         ports:
           - 3306
 #        volumes:
@@ -42,7 +41,7 @@ jobs:
           MYSQL_USER: magento
           MYSQL_PASSWORD: magento
           MYSQL_DATABASE: magento
-        options: --health-cmd="mysqladmin ping -h localhost -pmagento" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: --name mariadb --health-cmd="mysqladmin ping -h localhost -pmagento" --health-interval=5s --health-timeout=2s --health-retries=3
       redis:
         image: redis
         ports:
@@ -83,8 +82,9 @@ jobs:
       - name: Import Data to Database
         run: |
           docker ps
-          sudo apt-get install -y mysql-client libmysqlclient-dev
-          mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento -e "SHOW DATABASES"
+          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it mariadb mysql -hlocalhost -umagento -pmagento magento
+#          sudo apt-get install -y mysql-client libmysqlclient-dev
+#          mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento -e "SHOW DATABASES"
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento magento
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
 
