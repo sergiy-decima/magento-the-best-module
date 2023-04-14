@@ -218,7 +218,7 @@ jobs:
 
       - name: Execute Tests
         env:
-          INPUT_DB_HOST: localhost:${{ job.services.db.ports[3306] }}
+          INPUT_DB_HOST: 127.0.0.1:${{ job.services.db.ports[3306] }}
           INPUT_DB_USER: ${{ env.MYSQL_USER }}
           INPUT_DB_PASSWORD: ${{ env.MYSQL_PASSWORD }}
           INPUT_DB_NAME: ${{ env.MYSQL_DATABASE }}
@@ -231,7 +231,6 @@ jobs:
         run: |
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
-          ls -la dev/tests/integration/etc/*
           vendor/bin/phpunit -c dev/tests/integration/phpunit.xml \
             --testsuite Magento_Tests_Extensions \
             --coverage-html=../../../reports/html \
