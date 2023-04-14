@@ -82,7 +82,9 @@ jobs:
       - name: Import Data to Database
         run: |
           docker ps
-          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
+          sudo apt-get install -y mysql-client libmysqlclient-dev
+          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento magento
+#          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
 
 #      - name: Install PHP
 #        uses: shivammathur/setup-php@v2
