@@ -82,7 +82,7 @@ jobs:
       - name: Import Data to Database
         run: |
           docker ps
-          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it mariadb mysql -hlocalhost -umagento -pmagento magento
+          docker exec -it mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
 #          sudo apt-get install -y mysql-client libmysqlclient-dev
 #          mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento -e "SHOW DATABASES"
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento magento
