@@ -42,16 +42,17 @@ jobs:
     services:
       deploy:
         image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
-#        env:
-#          MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
-#          MAGENTO_RUN_MODE: developer
-#          PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
-#          XDEBUG_MODE: coverage
-#          SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
-#  #      working_dir: /app
-#        volumes:
-#          - magento:/app:delegated
-#          - extensions:/extensions:delegated
+        env:
+          MAGENTO_ROOT: /app
+          MAGENTO_RUN_MODE: developer
+          PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
+          XDEBUG_MODE: coverage
+          SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
+          options: --name deploy
+#          working_dir: /app
+          volumes:
+            - '${{ github.workspace }}:/app:delegated'
+#            - extensions:/extensions:delegated
       db:
         image: mariadb:10.4
         ports:
@@ -90,7 +91,12 @@ jobs:
         image: redis:6.2
         ports:
           - 6379:6379
-        options: --name redis --health-cmd="redis-cli ping || exit 1" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: >-
+          --name redis
+          --health-cmd="redis-cli ping || exit 1"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=3
 
     steps:
 #      - name: Install Environment
