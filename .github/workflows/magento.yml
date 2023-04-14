@@ -43,11 +43,11 @@ jobs:
 #        volumes:
 #          - ${{ github.workspace }}/extensions/Decima_TheBestModule/Test/Integration/dump:/docker-entrypoint-initdb.d
         env:
-          MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
-          MYSQL_USER: $MYSQL_USER
-          MYSQL_PASSWORD: $MYSQL_PASSWORD
-          MYSQL_DATABASE: $MYSQL_DATABASE
-        options: --name mariadb --health-cmd="mysqladmin ping -h localhost -p$MYSQL_PASSWORD" --health-interval=5s --health-timeout=2s --health-retries=3
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: magento
+          MYSQL_PASSWORD: magento
+          MYSQL_DATABASE: magento
+        options: --name mariadb --health-cmd="mysqladmin ping -h localhost -pmagento" --health-interval=5s --health-timeout=2s --health-retries=3
       redis:
         image: redis
         ports:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Import Data to Database
         run: |
-          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento
+          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i mariadb mysql -hlocalhost -u$MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE
 #          docker ps
 #          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
 #          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento -e "SHOW TABLES"
