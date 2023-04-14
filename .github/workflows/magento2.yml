@@ -32,7 +32,7 @@ jobs:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
       MAGENTO_ROOT: /app
-      DC_IMAGE_PHP_CLI_RUN_OPTIONS: -e "MAGENTO_ROOT=/app"   -e "MAGENTO_RUN_MODE=developer"   -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"   -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug"   -e "XDEBUG_MODE=coverage"   -v ${{ github.workspace }}:/app   -v ~/.composer/cache:/composer/cache
+      DC_IMAGE_PHP_CLI_RUN_OPTIONS: --network magento   -e "MAGENTO_ROOT=/app"   -e "MAGENTO_RUN_MODE=developer"   -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"   -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug"   -e "XDEBUG_MODE=coverage"   -v ${{ github.workspace }}:/app   -v ~/.composer/cache:/composer/cache
 
 #      DC_IMAGE_PHP_CLI_RUN_OPTIONS: |
 #        -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
@@ -63,7 +63,7 @@ jobs:
           PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
           XDEBUG_MODE: coverage
           SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
-        options: --name xdebug
+        options: --name xdebug --network magento
         volumes:
           - ${{ github.workspace }}:/app:delegated
 #            - extensions:/extensions:delegated
@@ -78,6 +78,7 @@ jobs:
           MYSQL_DATABASE: magento
         options: >-
           --name db
+          --network magento
           --health-cmd="mysqladmin ping -h localhost -pmagento"
           --health-interval=5s
           --health-timeout=2s
@@ -93,13 +94,13 @@ jobs:
           discovery.seed_hosts: opensearch
           bootstrap.memory_lock: true
           DISABLE_SECURITY_PLUGIN: true
-        options: --name opensearch
+        options: --name opensearch --network magento
 
       rabbitmq:
         image: rabbitmq:3.11
         ports:
           - 5672:5672
-        options: --name rabbitmq
+        options: --name rabbitmq --network magento
 
       redis:
         image: redis:6.2
@@ -107,6 +108,7 @@ jobs:
           - 6379:6379
         options: >-
           --name redis
+          --network magento
           --health-cmd="redis-cli ping || exit 1"
           --health-interval=5s
           --health-timeout=2s
@@ -141,11 +143,9 @@ jobs:
             ${{ env.DC_IMAGE_PHP_CLI }} bash -c "pwd && ls -la"
           docker network ls
 
-#      - name: Show Container Statuses
-#        run: |
-#          docker run --rm \
-#            ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
-#            ${{ env.DC_IMAGE_PHP_CLI }} bash -c "mysql -hdb -umagento -pmagento -e 'SHOW DATABASES'"
+      - name: Show Container Statuses
+        run: |
+          docker run --rm ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} bash -c "mysql -hdb -umagento -pmagento -e 'SHOW DATABASES'"
 
       - name: Show Container Statuses
         run: |
