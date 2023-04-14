@@ -216,6 +216,12 @@ jobs:
             --amqp-password=${{ env.AMQP_PASSWORD }} \
             --amqp-virtualhost=/
 
+      - name: Check Parameters
+        run: |
+          composer install
+          bin/magento set:upgr
+          bin/magento
+
       - name: Execute Tests
         env:
           INPUT_DB_HOST: 127.0.0.1:${{ job.services.db.ports[3306] }}
