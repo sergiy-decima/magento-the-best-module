@@ -17,18 +17,18 @@ jobs:
       MAGENTO_DIR: magento
       MAGENTO_ROOT: /app
       EXTENSIONS_DIR: extensions
-    container:
-      image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
-      env:
-        MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
-        MAGENTO_RUN_MODE: developer
-        PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
-        XDEBUG_MODE: coverage
-        SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
-#      working_dir: /app
-      volumes:
-        - magento:/app:delegated
-        - extensions:/extensions:delegated
+#    container:
+#      image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
+#      env:
+#        MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
+#        MAGENTO_RUN_MODE: developer
+#        PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
+#        XDEBUG_MODE: coverage
+#        SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
+##      working_dir: /app
+#      volumes:
+#        - magento:/app:delegated
+#        - extensions:/extensions:delegated
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-          path: ${{ env.MAGENTO_DIR }}
+#          path: ${{ env.MAGENTO_DIR }}
           ref: develop
 
 #      - name: Copy Test Configuration
@@ -62,11 +62,19 @@ jobs:
         with:
           path: ${{ env.EXTENSION_PATH }}
 
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: phpunit-bridge
+          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
+          coverage: xdebug
+
       - name: List Dir
         run: |
           docker ps -a
           pwd
-          ls -la magento
+
 #
 #      - name: Prepare Magento DataBase
 #        run: |
