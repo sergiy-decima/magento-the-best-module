@@ -48,10 +48,9 @@ jobs:
           PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
           XDEBUG_MODE: coverage
           SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
-          options: --name deploy
-#          working_dir: /app
-          volumes:
-            - '${{ github.workspace }}:/app:delegated'
+        options: --name deploy
+        volumes:
+          - ${{ github.workspace }}:/app:delegated
 #            - extensions:/extensions:delegated
       db:
         image: mariadb:10.4
