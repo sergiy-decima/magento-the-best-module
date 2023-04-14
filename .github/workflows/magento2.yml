@@ -31,14 +31,8 @@ jobs:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
       MAGENTO_ROOT: /app
-      DC_IMAGE_PHP_CLI_RUN_OPTIONS: |
-        -e "MAGENTO_ROOT=/app" \
-        -e "MAGENTO_RUN_MODE=developer" \
-        -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025" \
-        -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug" \
-        -e "XDEBUG_MODE=coverage" \
-        -v ${{ github.workspace }}:/app \
-        -v ~/.composer/cache:/composer/cache
+      DC_IMAGE_PHP_CLI_RUN_OPTIONS: -e "MAGENTO_ROOT=/app"   -e "MAGENTO_RUN_MODE=developer"   -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"   -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug"   -e "XDEBUG_MODE=coverage"   -v ${{ github.workspace }}:/app   -v ~/.composer/cache:/composer/cache
+
 #      DC_IMAGE_PHP_CLI_RUN_OPTIONS: |
 #        -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
 #        -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
