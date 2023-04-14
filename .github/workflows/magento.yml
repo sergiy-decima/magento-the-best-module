@@ -92,8 +92,12 @@ jobs:
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-#          path: ${{ env.MAGENTO_DIR }}
           ref: develop
+
+      - name: Git Checkout Module
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.EXTENSION_PATH }}
 
 #      - name: Copy Test Configuration
 #        run: |
@@ -102,16 +106,11 @@ jobs:
 ##          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
 ##          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 ##          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
-#
-      - name: Git Checkout Module
-        uses: actions/checkout@v3
-        with:
-          path: ${{ env.EXTENSION_PATH }}
 
       - name: Import Data to Database
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
-          docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }} -e "SHOW TABLES"
+#          docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }} -e "SHOW TABLES"
       #          docker ps
       #          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
 #          sudo apt-get install -y mysql-client libmysqlclient-dev
@@ -120,9 +119,6 @@ jobs:
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it mariadb mysql -hlocalhost -umagento -pmagento magento
 
-#      - name: List Dir
-#        run: |
-#          php -v
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -131,13 +127,6 @@ jobs:
           tools: phpunit-bridge
           extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
           coverage: xdebug
-
-#      - name: List Dir
-#        run: |
-#          php -v
-#          docker ps -a
-#          pwd
-#          ls -la ${{ env.EXTENSION_PATH }}/Test/Integration/dump
 
 #
 #      - name: Prepare Magento DataBase
@@ -165,7 +154,6 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Init Composer Private Repositories
-        working-directory: ${{ env.MAGENTO_DIR }}
         run: |
           composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
@@ -187,7 +175,7 @@ jobs:
 
       - name: Local Require Module
         run: |
-          composer config repositories.dev-extensions path ../${{ env.EXTENSIONS_DIR }}/*
+          composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
           composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
           cat composer.json
 #
