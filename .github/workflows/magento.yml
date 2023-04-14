@@ -83,7 +83,7 @@ jobs:
         run: |
           docker ps
           docker exec -i mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
-          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it mariadb mysql -hlocalhost -umagento -pmagento magento
+          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento
           docker exec -i mariadb mysql -hlocalhost -umagento -pmagento magento -e "SHOW TABLES"
 #          sudo apt-get install -y mysql-client libmysqlclient-dev
 #          mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento -e "SHOW DATABASES"
