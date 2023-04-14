@@ -238,16 +238,16 @@ jobs:
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
           docker run --rm --network ${{ steps.network-info.outputs.name }} \
-            ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }}
-            -e "INPUT_DB_HOST=db"
-            -e "INPUT_DB_USER=${{ env.MYSQL_USER }}"
-            -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}"
-            -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}"
-            -e "INPUT_OPENSEARCH_HOST=opensearch"
-            -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}"
-            -e "INPUT_AMQP_HOST=rabbitmq"
-            -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}"
-            -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}"
+            ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
+            -e "INPUT_DB_HOST=db" \
+            -e "INPUT_DB_USER=${{ env.MYSQL_USER }}" \
+            -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}" \
+            -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}" \
+            -e "INPUT_OPENSEARCH_HOST=opensearch" \
+            -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}" \
+            -e "INPUT_AMQP_HOST=rabbitmq" \
+            -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}" \
+            -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}" \
             -e "INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}" \
             ${{ env.DC_IMAGE_PHP_CLI }} \
               vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml ${{ env.EXTENSION_PATH }} \
