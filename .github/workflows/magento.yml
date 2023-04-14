@@ -2,7 +2,7 @@ name: Magento Coverage Test Integration
 run-name: Magento PHPUnit Integration Testing
 
 on:
-  push:
+#  push:
   workflow_dispatch:
   pull_request:
     paths-ignore:

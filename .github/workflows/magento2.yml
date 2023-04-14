@@ -157,20 +157,20 @@ jobs:
             -v `pwd`:${{ env.MAGENTO_ROOT }} \
             -v ~/.composer/cache:/composer/cache \
             magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bin/magento setup:config:set \
-              --db-host=127.0.0.1:${{ job.services.db.ports[3306] }} \
+              --db-host=db \
               --db-name=${{ env.MYSQL_DATABASE }} \
               --db-user=${{ env.MYSQL_USER }} \
               --db-password=${{ env.MYSQL_PASSWORD }} \
               --session-save=redis \
-              --session-save-redis-host=localhost \
+              --session-save-redis-host=redis \
               --session-save-redis-port=${{ job.services.redis.ports[6379] }} \
               --session-save-redis-db=0 \
               --cache-backend=redis \
-              --cache-backend-redis-server=localhost \
+              --cache-backend-redis-server=redis \
               --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} \
               --cache-backend-redis-db=1 \
               --page-cache=redis \
-              --page-cache-redis-server=localhost \
+              --page-cache-redis-server=redis \
               --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
               --page-cache-redis-db=2 \
               --page-cache-redis-compress-data=0
@@ -181,7 +181,7 @@ jobs:
             -v `pwd`:${{ env.MAGENTO_ROOT }} \
             -v ~/.composer/cache:/composer/cache \
             magento/magento-cloud-docker-php:${{ env.DC_IMAGE_PHP_CLI_TAG }} bin/magento setup:install \
-            --db-host=127.0.0.1:${{ job.services.db.ports[3306] }} \
+            --db-host=db \
             --db-name=${{ env.MYSQL_DATABASE }} \
             --db-user=${{ env.MYSQL_USER }} \
             --db-password=${{ env.MYSQL_PASSWORD }} \
@@ -200,11 +200,11 @@ jobs:
             --timezone=America/Los_Angeles \
             --use-rewrites=1 \
             --search-engine=opensearch \
-            --opensearch-host=localhost \
+            --opensearch-host=opensearch \
             --opensearch-port=${{ job.services.opensearch.ports[9200] }} \
             --magento-init-params="MAGE_MODE=developer" \
             --disable-modules=Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth \
-            --amqp-host=localhost \
+            --amqp-host=rabbitmq \
             --amqp-port=${{ job.services.rabbitmq.ports[5672] }} \
             --amqp-user=${{ env.AMQP_USER }} \
             --amqp-password=${{ env.AMQP_PASSWORD }} \
@@ -216,13 +216,13 @@ jobs:
 
       - name: Execute Tests
         env:
-          INPUT_DB_HOST: 127.0.0.1:${{ job.services.db.ports[3306] }}
+          INPUT_DB_HOST: db
           INPUT_DB_USER: ${{ env.MYSQL_USER }}
           INPUT_DB_PASSWORD: ${{ env.MYSQL_PASSWORD }}
           INPUT_DB_NAME: ${{ env.MYSQL_DATABASE }}
-          INPUT_OPENSEARCH_HOST: localhost
+          INPUT_OPENSEARCH_HOST: opensearch
           INPUT_OPENSEARCH_PORT: ${{ job.services.opensearch.ports[9200] }}
-          INPUT_AMQP_HOST: localhost
+          INPUT_AMQP_HOST: rabbitmq
           INPUT_AMQP_PORT: ${{ job.services.rabbitmq.ports[5672] }}
           INPUT_AMQP_USER: ${{ env.AMQP_USER }}
           INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}
@@ -233,13 +233,13 @@ jobs:
             -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" \
             -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" \
             -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH }}" \
-            -e "INPUT_DB_HOST=127.0.0.1:${{ job.services.db.ports[3306] }}"
+            -e "INPUT_DB_HOST=db"
             -e "INPUT_DB_USER=${{ env.MYSQL_USER }}"
             -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}"
             -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}"
-            -e "INPUT_OPENSEARCH_HOST=localhost"
+            -e "INPUT_OPENSEARCH_HOST=opensearch"
             -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}"
-            -e "INPUT_AMQP_HOST=localhost"
+            -e "INPUT_AMQP_HOST=rabbitmq"
             -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}"
             -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}"
             -e "INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}" \
