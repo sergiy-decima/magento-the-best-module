@@ -218,9 +218,7 @@ jobs:
 
       - name: Check Parameters
         run: |
-          composer install
-          bin/magento set:upgr
-          bin/magento
+          ls -la dev/tests/integration/framework/Magento/TestFramework
 
       - name: Execute Tests
         env:
