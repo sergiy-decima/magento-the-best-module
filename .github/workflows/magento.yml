@@ -39,7 +39,7 @@ jobs:
       db:
         image: mariadb:10.4
         ports:
-          - 3306:3306
+          - 3307:3306
 #        volumes:
 #          - ${{ github.workspace }}/extensions/Decima_TheBestModule/Test/Integration/dump:/docker-entrypoint-initdb.d
         env:
@@ -179,9 +179,53 @@ jobs:
         run: |
           docker ps
           bin/magento setup:config:set \
-            --db-host=127.0.0.1 \
-            --db-name=${{ env.MYSQL_DATABASE }} --db-user=${{ env.MYSQL_USER }} --db-password=${{ env.MYSQL_PASSWORD }} --session-save=redis --session-save-redis-host=localhost --session-save-redis-port=${{ job.services.redis.ports[6379] }} --session-save-redis-db=0 --cache-backend=redis --cache-backend-redis-server=localhost --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} --cache-backend-redis-db=1 --page-cache=redis --page-cache-redis-server=localhost --page-cache-redis-port=${{ job.services.redis.ports[6379] }} --page-cache-redis-db=2 --page-cache-redis-compress-data=0
+            --db-host=127.0.0.1:${{ job.services.db.ports[3306] }} \
+            --db-name=${{ env.MYSQL_DATABASE }} \
+            --db-user=${{ env.MYSQL_USER }} \
+            --db-password=${{ env.MYSQL_PASSWORD }} \
+            --session-save=redis \
+            --session-save-redis-host=localhost \
+            --session-save-redis-port=${{ job.services.redis.ports[6379] }} \
+            --session-save-redis-db=0 \
+            --cache-backend=redis \
+            --cache-backend-redis-server=localhost \
+            --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} \
+            --cache-backend-redis-db=1 \
+            --page-cache=redis \
+            --page-cache-redis-server=localhost \
+            --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
+            --page-cache-redis-db=2 \
+            --page-cache-redis-compress-data=0
           test -f app/etc/env.php && cat app/etc/env.php
+          bin/magento setup:install \
+              --db-host=127.0.0.1:${{ job.services.db.ports[3306] }} \
+              --db-name=${{ env.MYSQL_DATABASE }} \
+              --db-user=${{ env.MYSQL_USER }} \
+              --db-password=${{ env.MYSQL_PASSWORD }} \
+              --use-secure=0 \
+              --use-secure-admin=1 \
+              --base-url=http://magento2.test/ \
+              --base-url-secure=https://magento2.test/ \
+              --admin-user=admin \
+              --admin-password=123123q \
+              --admin-firstname=Adriano \
+              --admin-lastname=Celentano \
+              --admin-email=admin@gmail.com \
+              --backend-frontname=admin \
+              --language=en_US \
+              --currency=USD \
+              --timezone=America/Los_Angeles \
+              --use-rewrites=1 \
+              --search-engine=opensearch \
+              --opensearch-host=localhost \
+              --opensearch-port=${{ job.services.opensearch.ports[9200] }} \
+              --magento-init-params="MAGE_MODE=developer" \
+              --disable-modules=Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth \
+              --amqp-host=localhost \
+              --amqp-port=${{ job.services.rabbitmq.ports[5672] }} \
+              --amqp-user=guest \
+              --amqp-password=guest \
+              --amqp-virtualhost=/
 #
 #      - name: Execute Tests
 #        run: |
