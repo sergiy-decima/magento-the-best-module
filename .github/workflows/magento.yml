@@ -32,7 +32,6 @@ jobs:
     services:
       db:
         image: mariadb:10.4
-        shm_size: 2gb
         ports:
           - 3306
         env:
@@ -40,12 +39,12 @@ jobs:
           MYSQL_USER: magento
           MYSQL_PASSWORD: magento
           MYSQL_DATABASE: magento
-#          options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-        healthcheck:
-          test: 'mysqladmin ping -h localhost -p${MYSQL_PASSWORD}'
-          interval: 30s
-          timeout: 30s
-          retries: 3
+        options: --health-cmd="mysqladmin ping -h localhost -pmagento" --health-interval=5s --health-timeout=2s --health-retries=3
+#        healthcheck:
+#          test: 'mysqladmin ping -h localhost -p${MYSQL_PASSWORD}'
+#          interval: 30s
+#          timeout: 30s
+#          retries: 3
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
