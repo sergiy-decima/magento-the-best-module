@@ -35,7 +35,7 @@ jobs:
         ports:
           - 3306
         volumes:
-          - ${{ env.EXTENSION_PATH }}/Test/Integration/dump:/docker-entrypoint-initdb.d
+          - extensions/Decima_TheBestModule/Test/Integration/dump:/docker-entrypoint-initdb.d
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_USER: magento
