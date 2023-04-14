@@ -53,6 +53,10 @@ jobs:
         ports:
           - 6379/tcp
     steps:
+      - name: Install Environment
+        run: |
+          sudo apt-get install -y mysql-client libmysqlclient-dev
+
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
 #        with:
@@ -97,16 +101,21 @@ jobs:
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
 #          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it mariadb mysql -hlocalhost -umagento -pmagento magento
 
-#      - name: Install PHP
-#        uses: shivammathur/setup-php@v2
-#        with:
-#          php-version: 8.2
-#          tools: phpunit-bridge
-#          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
-#          coverage: xdebug
-#
-#      - name: List Dir
-#        run: |
+      - name: List Dir
+        run: |
+          php -v
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: phpunit-bridge
+          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
+          coverage: xdebug
+
+      - name: List Dir
+        run: |
+          php -v
 #          docker ps -a
 #          pwd
 #          ls -la ${{ env.EXTENSION_PATH }}/Test/Integration/dump
