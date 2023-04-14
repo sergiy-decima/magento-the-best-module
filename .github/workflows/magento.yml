@@ -29,6 +29,23 @@ jobs:
 #      volumes:
 #        - magento:/app:delegated
 #        - extensions:/extensions:delegated
+      services:
+        db:
+          image: mariadb:10.4
+          shm_size: 2gb
+          ports:
+            - 3306
+          env:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_USER: magento
+            MYSQL_PASSWORD: magento
+            MYSQL_DATABASE: magento
+#          options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+          healthcheck:
+            test: 'mysqladmin ping -h localhost -p${MYSQL_PASSWORD}'
+            interval: 30s
+            timeout: 30s
+            retries: 3
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
@@ -74,6 +91,7 @@ jobs:
         run: |
           docker ps -a
           pwd
+          ls -la
 
 #
 #      - name: Prepare Magento DataBase
@@ -87,15 +105,18 @@ jobs:
 #
 #      - name: Prepare Composer Extensions
 #        run: make extensions
-#
-#      - name: Create Composer Cache
-#        id: cache-composer
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.composer/cache
-#          key: ${{ runner.os }}-composer-${{ hashFiles('**/${{ env.MAGENTO_DIR }}/composer.lock') }}
-#          restore-keys: ${{ runner.os }}-composer-
 
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Create Composer Cache
+        id: cache-composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
 
 #      - name: Init Composer Private Repositories
