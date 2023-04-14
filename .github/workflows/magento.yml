@@ -34,8 +34,8 @@ jobs:
         image: mariadb:10.4
         ports:
           - 3306
-        volumes:
-          - ${{ github.workspace }}/extensions/Decima_TheBestModule/Test/Integration/dump:/docker-entrypoint-initdb.d
+#        volumes:
+#          - ${{ github.workspace }}/extensions/Decima_TheBestModule/Test/Integration/dump:/docker-entrypoint-initdb.d
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_USER: magento
@@ -80,19 +80,23 @@ jobs:
         with:
           path: ${{ env.EXTENSION_PATH }}
 
-      - name: Install PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-          tools: phpunit-bridge
-          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
-          coverage: xdebug
-
-      - name: List Dir
+      - name: Import Data to Database
         run: |
-          docker ps -a
-          pwd
-          ls -la ${{ env.EXTENSION_PATH }}/Test/Integration/dump
+          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql -hlocalhost -umagento -pmagento magento
+
+#      - name: Install PHP
+#        uses: shivammathur/setup-php@v2
+#        with:
+#          php-version: 8.2
+#          tools: phpunit-bridge
+#          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
+#          coverage: xdebug
+#
+#      - name: List Dir
+#        run: |
+#          docker ps -a
+#          pwd
+#          ls -la ${{ env.EXTENSION_PATH }}/Test/Integration/dump
 
 #
 #      - name: Prepare Magento DataBase
