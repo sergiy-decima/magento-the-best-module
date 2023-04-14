@@ -146,15 +146,11 @@ jobs:
 
       - name: Show Container Statuses
         run: |
-          docker exec -i \
-            ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
-            xdebug bash -c "pwd && ls -la"
+          docker exec -i xdebug bash -c "pwd && ls -la"
 
       - name: Show Container Statuses
         run: |
-          docker exec -i \
-            ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
-            xdebug bash -c "mysql -hdb -umagento -pmagento -e 'SHOW DATABASES'"
+          docker exec -i xdebug bash -c "mysql -hdb -umagento -pmagento -e 'SHOW DATABASES'"
 
 ##      - name: Copy Test Configuration
 ##        run: |
