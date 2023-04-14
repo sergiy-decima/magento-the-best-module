@@ -248,7 +248,7 @@ jobs:
             -e "INPUT_AMQP_HOST=rabbitmq" \
             -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}" \
             -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}" \
-            -e "INPUT_AMQP_PASSWORD: ${{ env.AMQP_PASSWORD }}" \
+            -e "INPUT_AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
             ${{ env.DC_IMAGE_PHP_CLI }} \
               vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml ${{ env.EXTENSION_PATH }} \
                 --coverage-html=../../../reports/html \
