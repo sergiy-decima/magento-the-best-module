@@ -64,6 +64,7 @@ jobs:
 
       - name: List Dir
         run: |
+          docker ps -a
           pwd
           ls -la magento
 #
