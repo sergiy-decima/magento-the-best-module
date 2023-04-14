@@ -113,7 +113,7 @@ jobs:
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
-      - name: Init Composer Private Repositories
+      - name: Init Private Composer Repositories
         run: |
           docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
@@ -216,40 +216,36 @@ jobs:
             ${{ env.DC_IMAGE_PHP_CLI }} bash -c \
               "cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv ../../../${{ env.EXTENSION_PATH }} \
                 --coverage-html=../../../reports/html \
-                --coverage-clover=../../../reports/clover.coverage.xml \
+                --coverage-clover=../../../reports/clover-coverage.xml \
                 --coverage-text=../../../reports/coverage.txt"
           test -f reports/coverage.txt && cat reports/coverage.txt
 
+      - name: Upload Coverage XML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-xml
+          path: reports/clover-coverage.xml
 
-#      - name: Execute Tests
-#        run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
-#
-#      - name: Upload Coverage XML
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage-xml
-#          path: ${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
-#
-#      - name: Upload Coverage HTML
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage-html
-#          path: ${{ env.EXTENSION_PATH }}/output/html
-#
-#  coverage:
-#    needs: build
-#    name: Check Coverage Summary
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Download Coverage XML
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: coverage-xml
-#
-#      - name: Coverage Summary Report
-#        id: clover_coverage
-#        uses: sergiy-decima/clover-coverage-action@1.0.0
-#        with:
-#          filename: clover-coverage.xml
-#          thresholds: '60-80'
-#          fail_if_low: true
+      - name: Upload Coverage HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-html
+          path: reports/html
+
+  coverage:
+    needs: build
+    name: Check Coverage Summary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Coverage XML
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-xml
+
+      - name: Coverage Summary Report
+        id: clover_coverage
+        uses: sergiy-decima/clover-coverage-action@1.0.0
+        with:
+          filename: clover-coverage.xml
+          thresholds: '60-80'
+          fail_if_low: true
