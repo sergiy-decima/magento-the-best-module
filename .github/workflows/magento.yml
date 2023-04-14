@@ -111,13 +111,8 @@ jobs:
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 #          docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }} -e "SHOW TABLES"
-      #          docker ps
-      #          docker exec -i mariadb mysql -hlocalhost -umagento -pmagento -e "SHOW DATABASES"
-#          sudo apt-get install -y mysql-client libmysqlclient-dev
+#          docker ps
 #          mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento -e "SHOW DATABASES"
-#          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql --host localhost --port ${{ job.services.mysql.ports[3306] }} -umagento -pmagento magento
-#          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
-#          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it mariadb mysql -hlocalhost -umagento -pmagento magento
 
 
       - name: Install PHP
@@ -177,15 +172,27 @@ jobs:
         run: |
           composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
           composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
-          cat composer.json
-#
-#      - name: Build Magento Application
-#        run: |
-#          make env mysql-config mage-work-dir composer-install mage-install flush-all up
-#
-#      - name: Environment Status
-#        run: |
-#          make status
+
+      - name: Build Magento Application
+        run: |
+          bin/magento setup:config:set \
+            --db-host=db \
+            --db-name=${{ env.MYSQL_DATABASE }} \
+            --db-user=${{ env.MYSQL_USER }} \
+            --db-password=${{ env.MYSQL_PASSWORD }} \
+            --session-save=redis \
+            --session-save-redis-host=redis \
+            --session-save-redis-port=6379 \
+            --session-save-redis-db=0 \
+            --cache-backend=redis \
+            --cache-backend-redis-server=redis \
+            --cache-backend-redis-port=6379 \
+            --cache-backend-redis-db=1 \
+            --page-cache=redis \
+            --page-cache-redis-server=redis \
+            --page-cache-redis-port=6379 \
+            --page-cache-redis-db=2 \
+            --page-cache-redis-compress-data=0
 #
 #      - name: Execute Tests
 #        run: |
