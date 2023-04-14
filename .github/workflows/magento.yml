@@ -42,11 +42,10 @@ jobs:
           MYSQL_PASSWORD: magento
           MYSQL_DATABASE: magento
         options: --health-cmd="mysqladmin ping -h localhost -pmagento" --health-interval=5s --health-timeout=2s --health-retries=3
-#        healthcheck:
-#          test: 'mysqladmin ping -h localhost -p${MYSQL_PASSWORD}'
-#          interval: 30s
-#          timeout: 30s
-#          retries: 3
+      redis:
+        image: redis
+        ports:
+          - 6379/tcp
     steps:
 #      - name: Git Checkout Deployment Tool
 #        uses: actions/checkout@v3
@@ -82,7 +81,8 @@ jobs:
 
       - name: Import Data to Database
         run: |
-          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql -hlocalhost -umagento -pmagento magento
+          docker ps
+          zcat ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -it db mysql -hlocalhost -umagento -pmagento magento
 
 #      - name: Install PHP
 #        uses: shivammathur/setup-php@v2
