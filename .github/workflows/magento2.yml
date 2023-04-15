@@ -79,6 +79,11 @@ jobs:
           --health-retries=3
 
     steps:
+      - name: Setup Environment
+        run: |
+          MAKE_OPTIONS=-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile
+          echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
+
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
@@ -111,7 +116,7 @@ jobs:
 
       - name: Import Data to Database
         run: |
-          make -f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile import-db
+          make ${{ env.MAKE_OPTIONS }} import-db
           docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }} -e "SHOW TABLES"
 #          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
