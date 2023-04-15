@@ -1,5 +1,7 @@
+MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+CURRENT_DIR := $(notdir $(patsubst %/,%,$(dir $(MKFILE_PATH))))
 
-include $(shell pwd)/.env.ci
+include $(CURRENT_DIR)/.env.ci
 
 help:
 
