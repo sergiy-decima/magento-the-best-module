@@ -1,5 +1,4 @@
-MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CURRENT_DIR := $(notdir $(patsubst %/,%,$(dir $(MKFILE_PATH))))
+CURRENT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 include $(CURRENT_DIR)/.env.ci
 
