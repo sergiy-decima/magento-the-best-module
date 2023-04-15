@@ -30,7 +30,7 @@ jobs:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
       MAGENTO_ROOT: /app
-      DC_IMAGE_PHP_CLI_RUN_OPTIONS: -e "MAGENTO_ROOT=/app"   -e "MAGENTO_RUN_MODE=developer"   -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"   -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug"   -e "XDEBUG_MODE=coverage"   -v ${{ github.workspace }}:/app   -v ~/.composer/cache:/composer/cache
+#      DC_IMAGE_PHP_CLI_RUN_OPTIONS: -e "MAGENTO_ROOT=/app"   -e "MAGENTO_RUN_MODE=developer"   -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"   -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug"   -e "XDEBUG_MODE=coverage"   -v ${{ github.workspace }}:/app   -v ~/.composer/cache:/composer/cache
 
     services:
       db:
@@ -83,6 +83,12 @@ jobs:
         run: |
           MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
+          DC_IMAGE_PHP_CLI_RUN_OPTIONS=--network $MAKE_OPTIONS -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}" -e "PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}" -e "XDEBUG_MODE=${{ env.XDEBUG_MODE }}" -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache
+          echo "DC_IMAGE_PHP_CLI_RUN_OPTIONS=$DC_IMAGE_PHP_CLI_RUN_OPTIONS" >> $GITHUB_ENV
+
+
+
+
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -117,13 +123,12 @@ jobs:
       - name: Import Data to Database
         run: |
           make ${{ env.MAKE_OPTIONS }} import-db
-          docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }} -e "SHOW TABLES"
 #          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
 
-#      - name: Init Private Composer Repositories
-#        run: |
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+      - name: Init Private Composer Repositories
+        run: |
+          docker run --rm ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 #
 #      - name: Composer Install
 #        env:
