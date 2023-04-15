@@ -1,5 +1,5 @@
 
-include .env.ci
+include ${PWD}/.env.ci
 
 help:
 
