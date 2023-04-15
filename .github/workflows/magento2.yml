@@ -81,7 +81,7 @@ jobs:
     steps:
       - name: Setup Environment
         run: |
-          MAKE_OPTIONS=-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile
+          MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
 
       - name: Git Checkout Application
