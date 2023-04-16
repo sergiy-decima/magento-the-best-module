@@ -15,7 +15,7 @@ env:
   MYSQL_DATABASE: magento
   AMQP_USER: guest
   AMQP_PASSWORD: guest
-  DC_IMAGE_PHP_CLI: magento/magento-cloud-docker-php:8.2-cli-1.3.5
+  DC_PHP_CLI_IMAGE: magento/magento-cloud-docker-php:8.2-cli-1.3.5
   MAGENTO_RUN_MODE: developer
   SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
   PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
@@ -30,7 +30,6 @@ jobs:
       EXTENSION_PATH: extensions/Decima_TheBestModule
       MAGENTO_DIR: magento
       MAGENTO_ROOT: /app
-#      DC_IMAGE_PHP_CLI_RUN_OPTIONS: -e "MAGENTO_ROOT=/app"   -e "MAGENTO_RUN_MODE=developer"   -e "SENDMAIL_PATH=/usr/local/bin/mhsendmail --smtp-addr=mailhog:1025"   -e "PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug"   -e "XDEBUG_MODE=coverage"   -v ${{ github.workspace }}:/app   -v ~/.composer/cache:/composer/cache
 
     services:
       db:
@@ -92,8 +91,8 @@ jobs:
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
           DC_IMAGE_PHP_CLI_RUN_OPTIONS="--rm --network ${{ env.DOCKER_NETWORK }} -e 'MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}' -e 'MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}' -e 'SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}' -e 'PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}' -e 'XDEBUG_MODE=${{ env.XDEBUG_MODE }}' -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache"
           echo "DC_IMAGE_PHP_CLI_RUN_OPTIONS=$DC_IMAGE_PHP_CLI_RUN_OPTIONS" >> $GITHUB_ENV
-          DC_PHP_CLI_IMAGE="$DC_IMAGE_PHP_CLI_RUN_OPTIONS ${{ env.DC_IMAGE_PHP_CLI }}"
-          echo "DC_PHP_CLI_IMAGE=$DC_PHP_CLI_IMAGE" >> $GITHUB_ENV
+          DC_PHP_CLI="$DC_IMAGE_PHP_CLI_RUN_OPTIONS ${{ env.DC_PHP_CLI_IMAGE }}"
+          echo "DC_PHP_CLI=$DC_PHP_CLI" >> $GITHUB_ENV
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -127,16 +126,14 @@ jobs:
 
       - name: Init Private Composer Repositories
         run: |
-          docker run ${{ env.DC_PHP_CLI_IMAGE }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
-#          docker run ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+          docker run ${{ env.DC_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
       - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
-          docker run ${{ env.DC_PHP_CLI_IMAGE }} composer install --ansi --no-interaction --prefer-dist
-#          docker run ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
+          docker run ${{ env.DC_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
 
       - name: Retrieve Composer Name and Version of Module
         id: extension-info
@@ -149,15 +146,14 @@ jobs:
 
       - name: Local Require Module
         run: |
-          docker run ${{ env.DC_PHP_CLI_IMAGE }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
-#          docker run ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
+          docker run ${{ env.DC_PHP_CLI }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
 
       - name: Show Container Statuses
         run: docker ps
 
       - name: Install Magento Application
         run: |
-          docker run ${{ env.DC_PHP_CLI_IMAGE }} \
+          docker run ${{ env.DC_PHP_CLI }} \
             bin/magento setup:config:set \
               --db-host=db \
               --db-name=${{ env.MYSQL_DATABASE }} \
@@ -176,7 +172,7 @@ jobs:
               --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
               --page-cache-redis-db=2 \
               --page-cache-redis-compress-data=0
-          docker run ${{ env.DC_PHP_CLI_IMAGE }} \
+          docker run ${{ env.DC_PHP_CLI }} \
             bin/magento setup:install \
               --db-host=db \
               --db-name=${{ env.MYSQL_DATABASE }} \
@@ -209,7 +205,7 @@ jobs:
 
       - name: Build Magento
         run: |
-          docker run ${{ env.DC_PHP_CLI_IMAGE }} bash -c "\
+          docker run ${{ env.DC_PHP_CLI }} bash -c "\
             ./bin/magento module:enable --all && \
             ./bin/magento setup:di:compile"
 
@@ -228,7 +224,7 @@ jobs:
             -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}" \
             -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}" \
             -e "INPUT_AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
-            ${{ env.DC_PHP_CLI_IMAGE }} bash -c \
+            ${{ env.DC_PHP_CLI }} bash -c \
               "cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv ../../../${{ env.EXTENSION_PATH }} \
                 --coverage-html=../../../reports/html \
                 --coverage-clover=../../../reports/clover-coverage.xml \
