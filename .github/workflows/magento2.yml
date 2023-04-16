@@ -155,112 +155,112 @@ jobs:
       - name: Show Container Statuses
         run: docker ps
 
-#      - name: Install Magento Application
-#        run: |
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} \
-#            bin/magento setup:config:set \
-#              --db-host=db \
-#              --db-name=${{ env.MYSQL_DATABASE }} \
-#              --db-user=${{ env.MYSQL_USER }} \
-#              --db-password=${{ env.MYSQL_PASSWORD }} \
-#              --session-save=redis \
-#              --session-save-redis-host=redis \
-#              --session-save-redis-port=${{ job.services.redis.ports[6379] }} \
-#              --session-save-redis-db=0 \
-#              --cache-backend=redis \
-#              --cache-backend-redis-server=redis \
-#              --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} \
-#              --cache-backend-redis-db=1 \
-#              --page-cache=redis \
-#              --page-cache-redis-server=redis \
-#              --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
-#              --page-cache-redis-db=2 \
-#              --page-cache-redis-compress-data=0
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} \
-#            bin/magento setup:install \
-#              --db-host=db \
-#              --db-name=${{ env.MYSQL_DATABASE }} \
-#              --db-user=${{ env.MYSQL_USER }} \
-#              --db-password=${{ env.MYSQL_PASSWORD }} \
-#              --use-secure=0 \
-#              --use-secure-admin=1 \
-#              --base-url=http://magento2.test/ \
-#              --base-url-secure=https://magento2.test/ \
-#              --admin-user=admin \
-#              --admin-password=123123q \
-#              --admin-firstname=Adriano \
-#              --admin-lastname=Celentano \
-#              --admin-email=admin@gmail.com \
-#              --backend-frontname=admin \
-#              --language=en_US \
-#              --currency=USD \
-#              --timezone=America/Los_Angeles \
-#              --use-rewrites=1 \
-#              --search-engine=opensearch \
-#              --opensearch-host=opensearch \
-#              --opensearch-port=${{ job.services.opensearch.ports[9200] }} \
-#              --magento-init-params="MAGE_MODE=developer" \
-#              --disable-modules=Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth \
-#              --amqp-host=rabbitmq \
-#              --amqp-port=${{ job.services.rabbitmq.ports[5672] }} \
-#              --amqp-user=${{ env.AMQP_USER }} \
-#              --amqp-password=${{ env.AMQP_PASSWORD }} \
-#              --amqp-virtualhost=/
-#
-#      - name: Build Magento
-#        run: |
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} bash -c "\
-#            ./bin/magento module:enable --all && \
-#            ./bin/magento setup:di:compile"
-#
-#      - name: Execute Tests
-#        run: |
-#          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
-#          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} \
-#            -e "INPUT_DB_HOST=db" \
-#            -e "INPUT_DB_USER=${{ env.MYSQL_USER }}" \
-#            -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}" \
-#            -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}" \
-#            -e "INPUT_OPENSEARCH_HOST=opensearch" \
-#            -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}" \
-#            -e "INPUT_AMQP_HOST=rabbitmq" \
-#            -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}" \
-#            -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}" \
-#            -e "INPUT_AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
-#            ${{ env.DC_IMAGE_PHP_CLI }} bash -c \
-#              "cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv ../../../${{ env.EXTENSION_PATH }} \
-#                --coverage-html=../../../reports/html \
-#                --coverage-clover=../../../reports/clover-coverage.xml \
-#                --coverage-text=../../../reports/coverage.txt"
-#          test -f reports/coverage.txt && cat reports/coverage.txt
-#
-#      - name: Upload Coverage XML
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage-xml
-#          path: reports/clover-coverage.xml
-#
-#      - name: Upload Coverage HTML
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage-html
-#          path: reports/html
-#
-#  coverage:
-#    needs: build
-#    name: Check Coverage Summary
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Download Coverage XML
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: coverage-xml
-#
-#      - name: Coverage Summary Report
-#        id: clover_coverage
-#        uses: sergiy-decima/clover-coverage-action@1.0.0
-#        with:
-#          filename: clover-coverage.xml
-#          thresholds: '60-80'
-#          fail_if_low: true
+      - name: Install Magento Application
+        run: |
+          docker run ${{ env.DC_PHP_CLI_IMAGE }} \
+            bin/magento setup:config:set \
+              --db-host=db \
+              --db-name=${{ env.MYSQL_DATABASE }} \
+              --db-user=${{ env.MYSQL_USER }} \
+              --db-password=${{ env.MYSQL_PASSWORD }} \
+              --session-save=redis \
+              --session-save-redis-host=redis \
+              --session-save-redis-port=${{ job.services.redis.ports[6379] }} \
+              --session-save-redis-db=0 \
+              --cache-backend=redis \
+              --cache-backend-redis-server=redis \
+              --cache-backend-redis-port=${{ job.services.redis.ports[6379] }} \
+              --cache-backend-redis-db=1 \
+              --page-cache=redis \
+              --page-cache-redis-server=redis \
+              --page-cache-redis-port=${{ job.services.redis.ports[6379] }} \
+              --page-cache-redis-db=2 \
+              --page-cache-redis-compress-data=0
+          docker run ${{ env.DC_PHP_CLI_IMAGE }} \
+            bin/magento setup:install \
+              --db-host=db \
+              --db-name=${{ env.MYSQL_DATABASE }} \
+              --db-user=${{ env.MYSQL_USER }} \
+              --db-password=${{ env.MYSQL_PASSWORD }} \
+              --use-secure=0 \
+              --use-secure-admin=1 \
+              --base-url=http://magento2.test/ \
+              --base-url-secure=https://magento2.test/ \
+              --admin-user=admin \
+              --admin-password=123123q \
+              --admin-firstname=Adriano \
+              --admin-lastname=Celentano \
+              --admin-email=admin@gmail.com \
+              --backend-frontname=admin \
+              --language=en_US \
+              --currency=USD \
+              --timezone=America/Los_Angeles \
+              --use-rewrites=1 \
+              --search-engine=opensearch \
+              --opensearch-host=opensearch \
+              --opensearch-port=${{ job.services.opensearch.ports[9200] }} \
+              --magento-init-params="MAGE_MODE=developer" \
+              --disable-modules=Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth \
+              --amqp-host=rabbitmq \
+              --amqp-port=${{ job.services.rabbitmq.ports[5672] }} \
+              --amqp-user=${{ env.AMQP_USER }} \
+              --amqp-password=${{ env.AMQP_PASSWORD }} \
+              --amqp-virtualhost=/
+
+      - name: Build Magento
+        run: |
+          docker run ${{ env.DC_PHP_CLI_IMAGE }} bash -c "\
+            ./bin/magento module:enable --all && \
+            ./bin/magento setup:di:compile"
+
+      - name: Execute Tests
+        run: |
+          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
+          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
+          docker run \
+            -e "INPUT_DB_HOST=db" \
+            -e "INPUT_DB_USER=${{ env.MYSQL_USER }}" \
+            -e "INPUT_DB_PASSWORD=${{ env.MYSQL_PASSWORD }}" \
+            -e "INPUT_DB_NAME=${{ env.MYSQL_DATABASE }}" \
+            -e "INPUT_OPENSEARCH_HOST=opensearch" \
+            -e "INPUT_OPENSEARCH_PORT=${{ job.services.opensearch.ports[9200] }}" \
+            -e "INPUT_AMQP_HOST=rabbitmq" \
+            -e "INPUT_AMQP_PORT=${{ job.services.rabbitmq.ports[5672] }}" \
+            -e "INPUT_AMQP_USER=${{ env.AMQP_USER }}" \
+            -e "INPUT_AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
+            ${{ env.DC_PHP_CLI_IMAGE }} bash -c \
+              "cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv ../../../${{ env.EXTENSION_PATH }} \
+                --coverage-html=../../../reports/html \
+                --coverage-clover=../../../reports/clover-coverage.xml \
+                --coverage-text=../../../reports/coverage.txt"
+          test -f reports/coverage.txt && cat reports/coverage.txt
+
+      - name: Upload Coverage XML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-xml
+          path: reports/clover-coverage.xml
+
+      - name: Upload Coverage HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-html
+          path: reports/html
+
+  coverage:
+    needs: build
+    name: Check Coverage Summary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Coverage XML
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-xml
+
+      - name: Coverage Summary Report
+        id: clover_coverage
+        uses: sergiy-decima/clover-coverage-action@1.0.0
+        with:
+          filename: clover-coverage.xml
+          thresholds: '60-80'
+          fail_if_low: true
