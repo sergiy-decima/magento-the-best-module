@@ -90,12 +90,8 @@ jobs:
         run: |
           MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
-          DC_IMAGE_PHP_CLI_RUN_OPTIONS="--network ${{ env.DOCKER_NETWORK }} -e 'MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}' -e 'MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}' -e 'SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}' -e 'PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}' -e 'XDEBUG_MODE=${{ env.XDEBUG_MODE }}' -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache"
+          DC_IMAGE_PHP_CLI_RUN_OPTIONS="--rm --network ${{ env.DOCKER_NETWORK }} -e 'MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}' -e 'MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}' -e 'SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}' -e 'PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}' -e 'XDEBUG_MODE=${{ env.XDEBUG_MODE }}' -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache"
           echo "DC_IMAGE_PHP_CLI_RUN_OPTIONS=$DC_IMAGE_PHP_CLI_RUN_OPTIONS" >> $GITHUB_ENV
-
-
-
-
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
@@ -129,31 +125,31 @@ jobs:
 
       - name: Init Private Composer Repositories
         run: |
-          docker run --rm ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
-#
-#      - name: Composer Install
-#        env:
-#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
-#        run: |
-#          echo "$AUTH_JSON" > auth.json
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
-#
-#      - name: Retrieve Composer Name and Version of Module
-#        id: extension-info
-#        working-directory: ${{ env.EXTENSION_PATH }}
-#        run: |
-#          EXTENSION_NAME=`cat composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
-#          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
-#          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
-#          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
-#
-#      - name: Local Require Module
-#        run: |
-#          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
-#
-#      - name: Show Container Statuses
-#        run: docker ps
-#
+          docker run ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+
+      - name: Composer Install
+        env:
+          AUTH_JSON: ${{ secrets.AUTH_JSON }}
+        run: |
+          echo "$AUTH_JSON" > auth.json
+          docker run ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
+
+      - name: Retrieve Composer Name and Version of Module
+        id: extension-info
+        working-directory: ${{ env.EXTENSION_PATH }}
+        run: |
+          EXTENSION_NAME=`cat composer.json | grep "name" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+          echo "name=$EXTENSION_NAME" >> $GITHUB_OUTPUT
+          EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
+          echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Local Require Module
+        run: |
+          docker run ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
+
+      - name: Show Container Statuses
+        run: docker ps
+
 #      - name: Install Magento Application
 #        run: |
 #          docker run --rm --network ${{ steps.network-info.outputs.name }} ${{ env.DC_IMAGE_PHP_CLI_RUN_OPTIONS }} ${{ env.DC_IMAGE_PHP_CLI }} \
