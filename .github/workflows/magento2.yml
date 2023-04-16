@@ -89,8 +89,8 @@ jobs:
         run: |
           MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
-          DC_PHP_CLI_RUN_OPTIONS="--rm --network ${{ env.DC_NETWORK }} -e 'MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}' -e 'MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}' -e 'SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}' -e 'PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}' -e 'XDEBUG_MODE=${{ env.XDEBUG_MODE }}' -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache"
-          DC_PHP_CLI="$DC_IMAGE_PHP_CLI_RUN_OPTIONS ${{ env.DC_PHP_CLI_IMAGE }}"
+          DC_PHP_CLI_OPTIONS="--rm --network ${{ env.DC_NETWORK }} -e 'MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}' -e 'MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}' -e 'SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}' -e 'PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}' -e 'XDEBUG_MODE=${{ env.XDEBUG_MODE }}' -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache"
+          DC_PHP_CLI="$DC_PHP_CLI_OPTIONS ${{ env.DC_PHP_CLI_IMAGE }}"
           echo "DC_PHP_CLI=$DC_PHP_CLI" >> $GITHUB_ENV
 
       - name: Git Checkout Application
