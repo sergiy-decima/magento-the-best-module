@@ -8,28 +8,25 @@ on:
     paths-ignore:
       - '**.md'
 
-env:
-  MYSQL_ROOT_PASSWORD: root
-  MYSQL_USER: magento
-  MYSQL_PASSWORD: magento
-  MYSQL_DATABASE: magento
-  AMQP_USER: guest
-  AMQP_PASSWORD: guest
-  DC_PHP_CLI_IMAGE: magento/magento-cloud-docker-php:8.2-cli-1.3.5
-  MAGENTO_RUN_MODE: developer
-  SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
-  PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
-  XDEBUG_MODE: coverage
-
 jobs:
   build:
     name: Build & Run Tests
     runs-on: ubuntu-latest
     env:
+      AMQP_USER: guest
+      AMQP_PASSWORD: guest
+      DC_PHP_CLI_IMAGE: magento/magento-cloud-docker-php:8.2-cli-1.3.5
       EXTENSIONS_DIR: extensions
-      EXTENSION_PATH: extensions/Decima_TheBestModule
-      MAGENTO_DIR: magento
+      MAGENTO_RUN_MODE: developer
+      MODULE_DIR: decima_module
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: magento
+      MYSQL_PASSWORD: magento
+      MYSQL_DATABASE: magento
       MAGENTO_ROOT: /app
+      PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
+      SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
+      XDEBUG_MODE: coverage
 
     services:
       db:
@@ -78,15 +75,23 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: Extract Container Network
+      - name: "Environment: Extract Docker Container Network"
         run: |
           NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
           echo "DC_NETWORK=$NETWORK" >> $GITHUB_ENV
 
-      - name: Setup Environment
+      - name: "Environment: Retrieve Docker PHP CLI Settings"
+        run: |
+          EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
+          echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
+
+      - name: "Environment: Retrieve Make Options"
         run: |
           MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
+
+      - name: "Environment: Retrieve Docker PHP CLI Settings"
+        run: |
           DC_PHP_CLI_OPTIONS="--rm --network ${{ env.DC_NETWORK }} -e 'MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}' -e 'MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}' -e 'SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}' -e 'PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}' -e 'XDEBUG_MODE=${{ env.XDEBUG_MODE }}' -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache"
           DC_PHP_CLI="$DC_PHP_CLI_OPTIONS ${{ env.DC_PHP_CLI_IMAGE }}"
           echo "DC_PHP_CLI=$DC_PHP_CLI" >> $GITHUB_ENV
@@ -143,7 +148,10 @@ jobs:
 
       - name: Local Require Module
         run: |
-          docker run ${{ env.DC_PHP_CLI }} bash -c "composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist"
+          docker run ${{ env.DC_PHP_CLI }} bash -c "\
+            composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && \
+            composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist \
+          "
 
       - name: Show Container Statuses
         run: docker ps
