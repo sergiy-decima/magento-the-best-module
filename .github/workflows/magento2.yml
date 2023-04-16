@@ -79,11 +79,18 @@ jobs:
           --health-retries=3
 
     steps:
+      - name: Extract Container Network
+        id: network-info
+        run: |
+          NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
+          echo "name=$NETWORK" >> $GITHUB_OUTPUT
+          echo "DOCKER_NETWORK=$NETWORK" >> $GITHUB_ENV
+
       - name: Setup Environment
         run: |
           MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
           echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
-          DC_IMAGE_PHP_CLI_RUN_OPTIONS=--network $MAKE_OPTIONS -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}" -e "PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}" -e "XDEBUG_MODE=${{ env.XDEBUG_MODE }}" -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache
+          DC_IMAGE_PHP_CLI_RUN_OPTIONS=--network ${{ env.DOCKER_NETWORK }} -e "MAGENTO_ROOT=${{ env.MAGENTO_ROOT }}" -e "MAGENTO_RUN_MODE=${{ env.MAGENTO_RUN_MODE }}" -e "SENDMAIL_PATH=${{ env.SENDMAIL_PATH}}" -e "PHP_EXTENSIONS=${{ env.PHP_EXTENSIONS }}" -e "XDEBUG_MODE=${{ env.XDEBUG_MODE }}" -v ${{ github.workspace }}:${{ env.MAGENTO_ROOT }} -v ~/.composer/cache:/composer/cache
           echo "DC_IMAGE_PHP_CLI_RUN_OPTIONS=$DC_IMAGE_PHP_CLI_RUN_OPTIONS" >> $GITHUB_ENV
 
 
@@ -113,12 +120,6 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
-
-      - name: Extract Container Network
-        id: network-info
-        run: |
-          NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
-          echo "name=$NETWORK" >> $GITHUB_OUTPUT
 
       - name: Import Data to Database
         run: |
