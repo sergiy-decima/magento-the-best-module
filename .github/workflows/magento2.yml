@@ -79,10 +79,8 @@ jobs:
 
     steps:
       - name: Extract Container Network
-        id: network-info
         run: |
           NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
-          echo "name=$NETWORK" >> $GITHUB_OUTPUT
           echo "DC_NETWORK=$NETWORK" >> $GITHUB_ENV
 
       - name: Setup Environment
