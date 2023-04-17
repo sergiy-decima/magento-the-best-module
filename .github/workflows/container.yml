@@ -1,5 +1,5 @@
-name: Magento Coverage Test
-run-name: Magento Coverage Test
+name: Magento Container Coverage Test
+run-name: Magento Container Coverage Test
 
 on:
   push:
@@ -23,18 +23,16 @@ jobs:
       MYSQL_USER: magento
       MYSQL_PASSWORD: magento
       MYSQL_DATABASE: magento
-#    container:
-#      image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
-#      env:
-#        MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
-#        MAGENTO_RUN_MODE: developer
-#        PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
-#        XDEBUG_MODE: coverage
-#        SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
-##      working_dir: /app
-#      volumes:
-#        - magento:/app:delegated
-#        - extensions:/extensions:delegated
+    container:
+      image: magento/magento-cloud-docker-php:8.2-cli-1.3.5
+      env:
+        MAGENTO_ROOT: ${{ env.MAGENTO_ROOT }}
+        MAGENTO_RUN_MODE: developer
+        PHP_EXTENSIONS: bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl sodium xdebug
+        XDEBUG_MODE: coverage
+        SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
+      volumes:
+        - ${{ github.workspace }}:${{ env.MAGENTO_ROOT }}:delegated
     services:
       db:
         image: mariadb:10.4
@@ -86,9 +84,6 @@ jobs:
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
-          echo ${{ github.workspace }}
-          pwd
-          exit(1)
 
       - name: Git Checkout Application
         uses: actions/checkout@v3
