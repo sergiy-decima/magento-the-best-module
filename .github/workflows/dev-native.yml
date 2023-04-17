@@ -223,7 +223,7 @@ jobs:
         run: |
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/etc/* dev/tests/integration/etc/
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/integration/phpunit.xml
-          (cd dev/tests/integration/ && ../../../vendor/bin/phpunit -vvv -c phpunit.xml ${{ env.EXTENSION_PATH }} \
+          (cd dev/tests/integration/ && ../../../vendor/bin/phpunit -vvv -c phpunit.xml ../../../${{ env.EXTENSION_PATH }}/Test \
             --coverage-html=../../../reports/html \
             --coverage-clover=../../../reports/clover.coverage.xml \
             --coverage-text=../../../reports/coverage.txt)
