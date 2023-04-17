@@ -84,8 +84,8 @@ jobs:
 
       - name: Execute Tests
         run: |
-          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/unit/phpunit.xml
-          cd dev/tests/integration && ../../../vendor/bin/phpunit -c phpunit.xml -vvv \
+          sudo cp ${{ env.EXTENSION_PATH }}/Test/phpunit.xml dev/tests/unit/phpunit.xml
+          cd dev/tests/unit && ../../../vendor/bin/phpunit -c phpunit.xml -vvv \
             ../../../${{ env.EXTENSION_PATH }}/Test/Unit \
             --coverage-html=../../../reports/html \
             --coverage-clover=../../../reports/clover-coverage.xml \
