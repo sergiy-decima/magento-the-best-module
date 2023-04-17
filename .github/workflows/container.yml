@@ -116,6 +116,7 @@ jobs:
       - name: Init Composer Private Repositories
         run: |
           cd /app && composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+          echo $PHP_EXTENSIONS
 
       - name: Composer Install
         env:
