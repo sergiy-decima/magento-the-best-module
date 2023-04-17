@@ -85,18 +85,12 @@ jobs:
       - name: Execute Tests
         run: |
           sudo cp ${{ env.EXTENSION_PATH }}/Test/Unit/phpunit.xml dev/tests/unit/phpunit.xml
-          (\
-          cd dev/tests/unit && ../../../vendor/bin/phpunit -c phpunit.xml -vvv \
+          ( cd dev/tests/unit && ../../../vendor/bin/phpunit -c phpunit.xml -vvv \
             ../../../${{ env.EXTENSION_PATH }}/Test/Unit \
             --coverage-html=../../../reports/html \
             --coverage-clover=../../../reports/clover-coverage.xml \
-            --coverage-text=../../../reports/coverage.txt \
-          )
-          pwd
-          ls -la
-          echo "========================================"
-          ls -la dev/tests/unit
-          test -f reports/coverage.txt && cat reports/coverage.txt
+            --coverage-text=../../../reports/coverage.txt )
+          cat reports/coverage.txt
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
