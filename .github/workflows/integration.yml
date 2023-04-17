@@ -75,7 +75,7 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: "Environment: Subject Module Path"
+      - name: "Environment: Retrieve Subject Module Path"
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
