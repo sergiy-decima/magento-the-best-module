@@ -149,7 +149,7 @@ jobs:
       - name: Show Container Status
         run: docker ps
 
-      - name: Install Magento Application
+      - name: Setup Magento Application
         run: |
           docker run ${{ env.DC_PHP_CLI }} \
             bin/magento setup:config:set \
