@@ -1,5 +1,5 @@
-name: Magento Coverage Test Integration
-run-name: Magento PHPUnit Integration Testing
+name: Magento Coverage Test
+run-name: Magento Coverage Test
 
 on:
   push:
@@ -75,13 +75,14 @@ jobs:
         image: redis:6.2
         ports:
           - 6379:6379
-        options: --name redis --health-cmd="redis-cli ping || exit 1" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: >-
+          --name redis
+          --health-cmd="redis-cli ping || exit 1"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=3
 
     steps:
-      - name: Install Environment
-        run: |
-          sudo apt-get install -y mysql-client libmysqlclient-dev
-
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
@@ -89,18 +90,10 @@ jobs:
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
           ref: develop
 
-      - name: Git Checkout Module
+      - name: Git Checkout Subject Module
         uses: actions/checkout@v3
         with:
           path: ${{ env.EXTENSION_PATH }}
-
-#      - name: Copy Test Configuration
-#        run: |
-#          mkdir -p ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/
-##          cp phpunit/etc/config-global.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/config-global.php
-##          cp phpunit/etc/install-config-mysql.php.dist ${{ env.MAGENTO_DIR }}/dev/tests/integration/etc/install-config-mysql.php
-##          cp phpunit/phpunit.xml.dist ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
-##          cat ${{ env.MAGENTO_DIR }}/phpunit.xml.dist
 
       - name: Import Data to Database
         run: |
@@ -135,9 +128,9 @@ jobs:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
-          composer install --ansi --no-interaction --prefer-dist
+          composer install --ansi --no-interaction --no-suggest --prefer-dist
 
-      - name: Retrieve Composer Name and Version of Module
+      - name: Retrieve Composer Name and Version of Subject Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
@@ -146,13 +139,10 @@ jobs:
           EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Local Require Module
+      - name: Require Subject Module
         run: |
           composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
-          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
-
-      - name: Show Container Statuses
-        run: docker ps
+          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --no-suggest --prefer-dist
 
       - name: Build Magento Application
         run: |
@@ -204,9 +194,10 @@ jobs:
             --amqp-password=${{ env.AMQP_PASSWORD }} \
             --amqp-virtualhost=/
 
-      - name: Check Parameters
+      - name: Build Magento Application
         run: |
-          ls -la dev/tests/integration/framework/Magento/TestFramework
+          ./bin/magento module:enable --all
+          ./bin/magento setup:di:compile
 
       - name: Execute Tests
         env:
@@ -227,73 +218,34 @@ jobs:
             --coverage-html=../../../reports/html \
             --coverage-clover=../../../reports/clover.coverage.xml \
             --coverage-text=../../../reports/coverage.txt)
-          test -f reports/coverage.txt && cat reports/coverage.txt
-#          vendor/bin/phpunit -vvv -c dev/tests/integration/phpunit.xml \
-#            --testsuite Magento_Tests_Extensions \
-#            --coverage-html=../../../reports/html \
-#            --coverage-clover=../../../reports/clover.coverage.xml \
-#            --coverage-text=../../../reports/coverage.txt
-#          test -f reports/coverage.txt && cat reports/coverage.txt
-#          docker compose run --rm -e XDEBUG_MODE=coverage fpm_xdebug bash -c "vendor/bin/phpunit -c dev/tests/integration/phpunit.xml --testsuite Magento_Tests_Extensions"
-#          RUN_COMMAND="vendor/bin/phpunit -c phpunit.xml.dist -vvv --testsuite \"Magento_Tests_Extensions\" --coverage-html=../../../reports/html --coverage-clover=../../../reports/clover.coverage.xml --coverage-text=../../../reports/coverage.txt"
+          cat reports/coverage.txt
 
+      - name: Upload Coverage XML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-xml
+          path: reports/clover-coverage.xml
 
+      - name: Upload Coverage HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-html
+          path: reports/html
 
+  coverage:
+    needs: build
+    name: Check Coverage Summary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Coverage XML
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-xml
 
-
-
-
-#      - name: Install Composer Dependencies
-#        env:
-#          AUTH_JSON: ${{ secrets.AUTH_JSON }}
-#        run: |
-#          echo "$AUTH_JSON" > auth.json
-#          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader --no-suggest
-#
-
-#
-
-#
-#      - name: Init Composer Local Repository
-#        run: |
-#          composer config repositories.${{ steps.extension-info.outputs.name }} path ${{ env.EXTENSION_PATH }}
-#
-
-#
-#      - name: Build Magento
-#        run: |
-#          ./bin/magento module:enable --all
-#          ./bin/magento setup:di:compile
-#
-#      - name: Execute Tests
-#        run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
-#
-#      - name: Upload Coverage XML
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage-xml
-#          path: ${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
-#
-#      - name: Upload Coverage HTML
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: coverage-html
-#          path: ${{ env.EXTENSION_PATH }}/output/html
-#
-#  coverage:
-#    needs: build
-#    name: Check Coverage Summary
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Download Coverage XML
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: coverage-xml
-#
-#      - name: Coverage Summary Report
-#        id: clover_coverage
-#        uses: sergiy-decima/clover-coverage-action@1.0.0
-#        with:
-#          filename: clover-coverage.xml
-#          thresholds: '60-80'
-#          fail_if_low: true
+      - name: Coverage Summary Report
+        id: clover_coverage
+        uses: sergiy-decima/clover-coverage-action@1.0.0
+        with:
+          filename: clover-coverage.xml
+          thresholds: '60-80'
+          fail_if_low: true
