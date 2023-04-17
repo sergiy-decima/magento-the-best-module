@@ -101,6 +101,17 @@ jobs:
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql -hdb -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
+
+
+      - name: "Test Params"
+        run: |
+          pwd
+          ls -la
+          exit(1)
+
+
+
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
