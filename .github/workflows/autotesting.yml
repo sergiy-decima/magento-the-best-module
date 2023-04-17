@@ -225,7 +225,7 @@ jobs:
             -e "AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
             ${{ env.DC_PHP_CLI }} bash -c "\
               cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv \
-                ../../../${{ env.EXTENSION_PATH }}/Test \
+                ../../../${{ env.EXTENSION_PATH }}/Test/Integration \
                 --coverage-html=../../../reports/html \
                 --coverage-clover=../../../reports/clover-coverage.xml \
                 --coverage-text=../../../reports/coverage.txt \
