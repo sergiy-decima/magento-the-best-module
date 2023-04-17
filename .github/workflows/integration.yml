@@ -1,5 +1,5 @@
 name: Coverage Test Integration
-run-name: Coverage Integration Testing
+run-name: Coverage Test Integration
 
 on:
   push:
