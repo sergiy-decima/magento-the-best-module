@@ -102,6 +102,10 @@ jobs:
         with:
           path: ${{ env.EXTENSION_PATH }}
 
+      - name: Import Data to Database
+        run: |
+          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -114,14 +118,6 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Import Data to Database
-        run: |
-          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
-
-      - name: Init Private Composer Repositories
-        run: |
-          docker run ${{ env.DC_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
-
       - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
@@ -129,7 +125,11 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           docker run ${{ env.DC_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
 
-      - name: Retrieve Composer Name and Version of Subject Module
+      - name: Composer Config Private Repositories for Subject Module
+        run: |
+          docker run ${{ env.DC_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+
+      - name: Composer Name and Version of Subject Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
@@ -138,7 +138,7 @@ jobs:
           EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Require Subject Module
+      - name: Composer Require Subject Module
         run: |
           docker run ${{ env.DC_PHP_CLI }} bash -c "\
             composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && \
