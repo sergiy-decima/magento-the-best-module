@@ -99,13 +99,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-xml
-          path: ${{ env.EXTENSION_PATH }}/reports/clover-coverage.xml
+          path: reports/clover-coverage.xml
 
       - name: Upload Coverage HTML
         uses: actions/upload-artifact@v3
         with:
           name: coverage-html
-          path: ${{ env.EXTENSION_PATH }}/reports/html
+          path: reports/html
 
   coverage:
     needs: build
