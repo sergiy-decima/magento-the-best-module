@@ -105,6 +105,7 @@ jobs:
 
       - name: "Test Params"
         run: |
+          docker ps
           pwd
           ls -la
           exit(1)
