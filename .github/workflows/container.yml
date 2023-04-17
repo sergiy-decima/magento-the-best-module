@@ -101,20 +101,6 @@ jobs:
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql -hdb -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
-
-
-      - name: "Test Params"
-        run: |
-          php -v
-          pwd
-          ls -la /app
-          echo "============================="
-          ls -la
-          exit(1)
-
-
-
-
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
@@ -129,14 +115,14 @@ jobs:
 
       - name: Init Composer Private Repositories
         run: |
-          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
+          cd /app && composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
       - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
-          composer install --ansi --no-interaction --prefer-dist
+          cd /app && composer install --ansi --no-interaction --prefer-dist
 
       - name: Retrieve Composer Name and Version of Subject Module
         id: extension-info
