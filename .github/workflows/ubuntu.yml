@@ -81,7 +81,6 @@ jobs:
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
-#          ref: develop
 
       - name: Git Checkout Subject Module
         uses: actions/checkout@v3
