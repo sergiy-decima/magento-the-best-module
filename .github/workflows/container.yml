@@ -32,7 +32,7 @@ jobs:
         XDEBUG_MODE: coverage
         SENDMAIL_PATH: /usr/local/bin/mhsendmail --smtp-addr=mailhog:1025
       volumes:
-        - ${{ github.workspace }}:${{ env.MAGENTO_ROOT }}:delegated
+        - ${{ github.workspace }}:/app:delegated
     services:
       db:
         image: mariadb:10.4
@@ -100,14 +100,6 @@ jobs:
       - name: Import Data to Database
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
-
-      - name: Install PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-          tools: phpunit-bridge
-          extensions: mbstring, xml, ctype, iconv, json, mcrypt, zip, simplexml, bcmath, intl, dom
-          coverage: xdebug
 
       - name: Get Composer Cache Directory
         id: composer-cache
