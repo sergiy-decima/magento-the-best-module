@@ -1,5 +1,5 @@
-name: Magento Docker Coverage Test Integration
-run-name: Magento Docker PHPUnit Integration Testing
+name: Coverage Test Integration
+run-name: Coverage Integration Testing
 
 on:
   push:
