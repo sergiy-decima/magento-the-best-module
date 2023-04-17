@@ -80,7 +80,7 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: "Environment: Retrieve Docker PHP CLI Settings"
+      - name: "Environment: Subject Module Path"
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
@@ -99,7 +99,7 @@ jobs:
 
       - name: Import Data to Database
         run: |
-          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
+          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | mysql -hdb -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
