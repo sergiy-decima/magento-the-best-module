@@ -106,11 +106,11 @@ jobs:
         run: |
           gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
-      - name: Get Composer Cache Directory
+      - name: Composer Get Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: Create Composer Cache
+      - name: Composer Create Cache
         id: cache-composer
         uses: actions/cache@v3
         with:
@@ -129,7 +129,7 @@ jobs:
         run: |
           docker run ${{ env.DC_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
-      - name: Composer Name and Version of Subject Module
+      - name: Composer Get Name and Version of Subject Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
@@ -148,7 +148,7 @@ jobs:
       - name: Show Container Status
         run: docker ps
 
-      - name: Setup Magento Application
+      - name: Magento Setup Application
         run: |
           docker run ${{ env.DC_PHP_CLI }} \
             bin/magento setup:config:set \
@@ -200,7 +200,7 @@ jobs:
               --amqp-password=${{ env.AMQP_PASSWORD }} \
               --amqp-virtualhost=/
 
-      - name: Build Magento Application
+      - name: Magento Build Application
         run: |
           docker run ${{ env.DC_PHP_CLI }} bash -c "\
             ./bin/magento module:enable --all && \
