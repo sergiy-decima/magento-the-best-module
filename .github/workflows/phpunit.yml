@@ -59,7 +59,7 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           composer install --ansi --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Init Composer Private Repositories
+      - name: Composer Configuration Private Repositories for Subject Module Dependencies
         run: |
           composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
@@ -72,7 +72,7 @@ jobs:
           EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Require Subject Module
+      - name: Composer Require Subject Module
         run: |
           composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
           composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --optimize-autoloader

@@ -111,16 +111,16 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Init Composer Private Repositories
-        run: |
-          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
-
       - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
           composer install --ansi --no-interaction --prefer-dist
+
+      - name: Composer Configuration Private Repositories for Subject Module Dependencies
+        run: |
+          composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
       - name: Retrieve Composer Name and Version of Subject Module
         id: extension-info
@@ -131,7 +131,7 @@ jobs:
           EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Require Subject Module
+      - name: Composer Require Subject Module
         run: |
           composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
           composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist

@@ -125,7 +125,7 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           docker run ${{ env.DC_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
 
-      - name: Composer Config Private Repositories for Subject Module
+      - name: Composer Configuration Private Repositories for Subject Module Dependencies
         run: |
           docker run ${{ env.DC_PHP_CLI }} composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
