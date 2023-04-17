@@ -107,6 +107,8 @@ jobs:
         run: |
           php -v
           pwd
+          ls -la /app
+          echo "============================="
           ls -la
           exit(1)
 
