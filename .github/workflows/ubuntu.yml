@@ -71,7 +71,7 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: "Environment: Retrieve Docker PHP CLI Settings"
+      - name: "Environment: Subject Module Path"
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
@@ -121,7 +121,7 @@ jobs:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
-          composer install --ansi --no-interaction --no-suggest --prefer-dist
+          composer install --ansi --no-interaction --prefer-dist
 
       - name: Retrieve Composer Name and Version of Subject Module
         id: extension-info
@@ -135,7 +135,7 @@ jobs:
       - name: Require Subject Module
         run: |
           composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
-          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --no-suggest --prefer-dist
+          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist
 
       - name: Setup Magento Application
         run: |

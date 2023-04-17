@@ -2,7 +2,7 @@ name: Coverage Test Unit
 run-name: Coverage Test Unit
 
 on:
-#  push:
+  push:
   workflow_dispatch:
   pull_request:
     paths-ignore:
@@ -16,7 +16,7 @@ jobs:
       EXTENSIONS_DIR: extensions
       MODULE_DIR: decima_module
     steps:
-      - name: "Environment: Retrieve Docker PHP CLI Settings"
+      - name: "Environment: Subject Module Path"
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
@@ -57,7 +57,7 @@ jobs:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
           echo "$AUTH_JSON" > auth.json
-          composer install --ansi --no-interaction --no-suggest --prefer-dist --optimize-autoloader
+          composer install --ansi --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Init Composer Private Repositories
         run: |
@@ -75,7 +75,7 @@ jobs:
       - name: Require Subject Module
         run: |
           composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
-          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --no-suggest --prefer-dist --optimize-autoloader
+          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Build Magento Application
         run: |
