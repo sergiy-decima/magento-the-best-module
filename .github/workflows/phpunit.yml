@@ -1,7 +1,8 @@
-name: Coverage Test
-run-name: PHPUnit Coverage Testing
+name: Coverage Test Unit
+run-name: Coverage Test Unit
 
 on:
+  push:
   workflow_dispatch:
   pull_request:
     paths-ignore:
@@ -12,15 +13,21 @@ jobs:
     name: Build & Run Tests
     runs-on: ubuntu-latest
     env:
-      EXTENSION_PATH: extensions/Decima_TheBestModule
+      EXTENSIONS_DIR: extensions
+      MODULE_DIR: decima_module
     steps:
+      - name: "Environment: Retrieve Docker PHP CLI Settings"
+        run: |
+          EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
+          echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
+
       - name: Git Checkout Application
         uses: actions/checkout@v3
         with:
           repository: sergiy-decima/magento-sample-project
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
 
-      - name: Git Checkout Module
+      - name: Git Checkout Subject Module
         uses: actions/checkout@v3
         with:
           path: ${{ env.EXTENSION_PATH }}
@@ -45,7 +52,7 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install Composer Dependencies
+      - name: Composer Install
         env:
           AUTH_JSON: ${{ secrets.AUTH_JSON }}
         run: |
@@ -56,7 +63,7 @@ jobs:
         run: |
           composer config repositories.sergiy-decima/magento-core-module vcs https://github.com/sergiy-decima/magento-core-module
 
-      - name: Retrieve Composer Name and Version of Module
+      - name: Retrieve Composer Name and Version of Subject Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
@@ -65,32 +72,37 @@ jobs:
           EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Init Composer Local Repository
+      - name: Require Subject Module
         run: |
-          composer config repositories.${{ steps.extension-info.outputs.name }} path ${{ env.EXTENSION_PATH }}
+          composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/*
+          composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --no-suggest --prefer-dist
 
-      - name: Composer Require Module
-        run: composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist --no-suggest
-
-      - name: Build Magento
+      - name: Build Magento Application
         run: |
           ./bin/magento module:enable --all
           ./bin/magento setup:di:compile
 
       - name: Execute Tests
-        run: vendor/bin/phpunit -c phpunit.xml.dist ${{ env.EXTENSION_PATH }} --coverage-html=${{ env.EXTENSION_PATH }}/output/html --coverage-clover=${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
+        run: |
+          sudo cp ${{ env.EXTENSION_PATH }}/Test/Integration/phpunit.xml dev/tests/unit/phpunit.xml
+          cd dev/tests/integration && ../../../vendor/bin/phpunit -c phpunit.xml -vvv \
+            ../../../${{ env.EXTENSION_PATH }}/Test/Unit \
+            --coverage-html=../../../reports/html \
+            --coverage-clover=../../../reports/clover-coverage.xml \
+            --coverage-text=../../../reports/coverage.txt
+          cat reports/coverage.txt
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
         with:
           name: coverage-xml
-          path: ${{ env.EXTENSION_PATH }}/output/clover-coverage.xml
+          path: ${{ env.EXTENSION_PATH }}/reports/clover-coverage.xml
 
       - name: Upload Coverage HTML
         uses: actions/upload-artifact@v3
         with:
           name: coverage-html
-          path: ${{ env.EXTENSION_PATH }}/output/html
+          path: ${{ env.EXTENSION_PATH }}/reports/html
 
   coverage:
     needs: build

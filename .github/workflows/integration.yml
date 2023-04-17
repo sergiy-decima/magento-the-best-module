@@ -75,15 +75,15 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: "Environment: Extract Docker Container Network"
-        run: |
-          DC_NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
-          echo "DC_NETWORK=$DC_NETWORK" >> $GITHUB_ENV
-
       - name: "Environment: Retrieve Docker PHP CLI Settings"
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
+
+      - name: "Environment: Extract Docker Container Network"
+        run: |
+          DC_NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
+          echo "DC_NETWORK=$DC_NETWORK" >> $GITHUB_ENV
 
       - name: "Environment: Retrieve Docker PHP CLI Settings"
         run: |
@@ -143,7 +143,7 @@ jobs:
         run: |
           docker run ${{ env.DC_PHP_CLI }} bash -c "\
             composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && \
-            composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --prefer-dist \
+            composer require ${{ steps.extension-info.outputs.name }}:${{ steps.extension-info.outputs.version }} --ansi --no-interaction --no-suggest --prefer-dist \
           "
 
       - name: Show Container Status
@@ -201,7 +201,7 @@ jobs:
               --amqp-password=${{ env.AMQP_PASSWORD }} \
               --amqp-virtualhost=/
 
-      - name: Build Magento
+      - name: Build Magento Application
         run: |
           docker run ${{ env.DC_PHP_CLI }} bash -c "\
             ./bin/magento module:enable --all && \
