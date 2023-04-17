@@ -90,7 +90,10 @@ jobs:
             --coverage-html=../../../reports/html \
             --coverage-clover=../../../reports/clover-coverage.xml \
             --coverage-text=../../../reports/coverage.txt
-          cat reports/coverage.txt
+          ls -la
+          echo "========================================"
+          ls -la dev/tests/unit
+          test -f reports/coverage.txt && cat reports/coverage.txt
 
       - name: Upload Coverage XML
         uses: actions/upload-artifact@v3
