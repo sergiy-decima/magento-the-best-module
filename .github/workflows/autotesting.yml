@@ -77,18 +77,13 @@ jobs:
     steps:
       - name: "Environment: Extract Docker Container Network"
         run: |
-          NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
-          echo "DC_NETWORK=$NETWORK" >> $GITHUB_ENV
+          DC_NETWORK=`docker container inspect --format '{{range $net,$v := .NetworkSettings.Networks}}{{printf "%s\n" $net}}{{end}}' db`
+          echo "DC_NETWORK=$DC_NETWORK" >> $GITHUB_ENV
 
       - name: "Environment: Retrieve Docker PHP CLI Settings"
         run: |
           EXTENSION_PATH="${{ env.EXTENSIONS_DIR }}/${{ env.MODULE_DIR }}"
           echo "EXTENSION_PATH=$EXTENSION_PATH" >> $GITHUB_ENV
-
-      - name: "Environment: Retrieve Make Options"
-        run: |
-          MAKE_OPTIONS="-f ${{ env.EXTENSION_PATH }}/.github/autotest/Makefile"
-          echo "MAKE_OPTIONS=$MAKE_OPTIONS" >> $GITHUB_ENV
 
       - name: "Environment: Retrieve Docker PHP CLI Settings"
         run: |
@@ -103,7 +98,7 @@ jobs:
           token: ${{ secrets.REPO_GITHUB_TOKEN }}
           ref: develop
 
-      - name: Git Checkout Module
+      - name: Git Checkout Subject Module
         uses: actions/checkout@v3
         with:
           path: ${{ env.EXTENSION_PATH }}
@@ -122,8 +117,7 @@ jobs:
 
       - name: Import Data to Database
         run: |
-          make ${{ env.MAKE_OPTIONS }} import-db
-#          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
+          gunzip < ${{ env.EXTENSION_PATH }}/Test/Integration/dump/test.dump.sql.gz | docker exec -i db mysql -hlocalhost -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} ${{ env.MYSQL_DATABASE }}
 
       - name: Init Private Composer Repositories
         run: |
@@ -136,7 +130,7 @@ jobs:
           echo "$AUTH_JSON" > auth.json
           docker run ${{ env.DC_PHP_CLI }} composer install --ansi --no-interaction --prefer-dist
 
-      - name: Retrieve Composer Name and Version of Module
+      - name: Retrieve Composer Name and Version of Subject Module
         id: extension-info
         working-directory: ${{ env.EXTENSION_PATH }}
         run: |
@@ -145,7 +139,7 @@ jobs:
           EXTENSION_VERSION=`cat composer.json | grep "version" | awk '{print $NF}' | head -1 | sed 's/[\",]//g'`
           echo "version=$EXTENSION_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Local Require Module
+      - name: Require Subject Module
         run: |
           docker run ${{ env.DC_PHP_CLI }} bash -c "\
             composer config repositories.dev-extensions path ${{ env.EXTENSIONS_DIR }}/* && \
@@ -230,7 +224,8 @@ jobs:
             -e "AMQP_USER=${{ env.AMQP_USER }}" \
             -e "AMQP_PASSWORD=${{ env.AMQP_PASSWORD }}" \
             ${{ env.DC_PHP_CLI }} bash -c "\
-              cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv ../../../${{ env.EXTENSION_PATH }} \
+              cd dev/tests/integration && ../../../vendor/bin/phpunit  -c phpunit.xml -vvv \
+                ../../../${{ env.EXTENSION_PATH }}/Test \
                 --coverage-html=../../../reports/html \
                 --coverage-clover=../../../reports/clover-coverage.xml \
                 --coverage-text=../../../reports/coverage.txt \
@@ -251,7 +246,7 @@ jobs:
 
   coverage:
     needs: build
-    name: Check Coverage Summary
+    name: Coverage Summary
     runs-on: ubuntu-latest
     steps:
       - name: Download Coverage XML
