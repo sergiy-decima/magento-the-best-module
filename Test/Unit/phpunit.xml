@@ -13,8 +13,8 @@
          bootstrap="./framework/bootstrap.php">
     <coverage>
         <include>
-            <directory suffix=".php">../../../extensions</directory>
-            <directory suffix=".php">../../../../extensions</directory>
+            <directory suffix=".php">../../../extensions/*</directory>
+            <directory suffix=".php">../../../../extensions/*</directory>
         </include>
         <exclude>
             <directory>../../../extensions/*/Test</directory>
